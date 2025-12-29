@@ -39,12 +39,19 @@
                         <li><a href="#contato" class="nav-link">Contato</a></li>
                     </ul>
                 
-                        <i class="fas fa-phone"></i>
-                        (24) 98119-1013 <br>
-                        (24) 99989-1676
-
-                        
-                    </a>
+                    <!-- CORREÇÃO: Contatos separados -->
+                    <div class="contact-buttons">
+                        <a href="tel:+5524981191013" class="btn-contact">
+                            <i class="fas fa-phone"></i>
+                            <span class="contact-name">Dr. Brener</span>
+                            <span class="contact-phone">(24) 98119-1013</span>
+                        </a>
+                        <a href="https://wa.me/5524999891676" target="_blank" class="btn-contact">
+                            <i class="fab fa-whatsapp"></i>
+                            <span class="contact-name">Dr. Paulo</span>
+                            <span class="contact-phone">(24) 99989-1676</span>
+                        </a>
+                    </div>
                 </nav>
                 
                 <button class="mobile-menu-btn" id="mobileMenuBtn">
@@ -118,9 +125,10 @@
                     <a href="#conte-seu-caso" class="servico-link">Consultar <i class="fas fa-arrow-right"></i></a>
                 </div>
 
-                   <div class="servico-card">
+                <!-- CORREÇÃO: Ícone alterado para Direito Público -->
+                <div class="servico-card">
                     <div class="servico-icon">
-                        <i class="fas fa-laptop-code"></i>
+                        <i class="fas fa-landmark"></i>
                     </div>
                     <h3>Direito Público</h3>
                     <p>Atuação em contencioso administrativo e judicial defesa do servidor e funcionalismo.</p>
@@ -153,8 +161,6 @@
                     <p>Proteção de dados, crimes digitais e compliance tecnológico</p>
                     <a href="#conte-seu-caso" class="servico-link">Consultar <i class="fas fa-arrow-right"></i></a>
                 </div>
-
-                       
             </div>
         </div>
     </section>
@@ -220,7 +226,7 @@
                                 <option value="civil">Direito Civil</option>
                                 <option value="previdenciario">Direito Previdenciário</option>
                                 <option value="tributario">Direito Tributário</option>
-                                <option value="consumidor">Direito Público</option>
+                                <option value="publico">Direito Público</option>
                                 <option value="consumidor">Direito do Consumidor</option>
                                 <option value="digital">Direito Digital</option>
                                 <option value="trabalhista">Direito Trabalhista</option>
