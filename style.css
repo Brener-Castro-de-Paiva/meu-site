@@ -57,7 +57,9 @@ body {
     z-index: 1000;
     transition: var(--transition);
 }
-
+.header {
+    padding: auto;
+}
 .header.scrolled {
     box-shadow: var(--shadow-md);
 }
@@ -66,15 +68,18 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 0;
+    padding:  0;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-    text-decoration: none;
-    color: var(--text-dark);
+    gap: 8px; /* agora com unidade */
+}
+
+.logo-img {
+    height: 150px;   /* ideal para header */
+    width: auto;
 }
 
 .logo i {
@@ -295,8 +300,8 @@ body {
 }
 
 .btn-secondary {
-    background: transparent;
-    color: var(--white);
+    background: none;
+    color: var(--primary-color);
     border: 2px solid var(--white);
 }
 
