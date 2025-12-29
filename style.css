@@ -57,9 +57,7 @@ body {
     z-index: 1000;
     transition: var(--transition);
 }
-.header {
-    padding: auto;
-}
+
 .header.scrolled {
     box-shadow: var(--shadow-md);
 }
@@ -68,18 +66,15 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding:  0;
+    padding: 1rem 0;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    gap: 8px; /* agora com unidade */
-}
-
-.logo-img {
-    height: 50px;   /* ideal para header */
-    width: auto;
+    gap: 1.25rem;
+    text-decoration: none;
+    color: var(--text-dark);
 }
 
 .logo i {
@@ -227,7 +222,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('imagem/backgroud_inicial-removebg-preview.png');
+    background-image: url('imagem/justica-background.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -300,8 +295,8 @@ body {
 }
 
 .btn-secondary {
-    background: none;
-    color: var(--primary-color);
+    background: transparent;
+    color: var(--white);
     border: 2px solid var(--white);
 }
 
