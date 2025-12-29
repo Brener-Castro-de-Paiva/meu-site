@@ -16,7 +16,42 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="imagem/logo_paiva_rocha_criativo_1.png" href="imagem/logo_paiva_rocha_criativo_1.png">
+    <link rel="icon" type="image/png" href="imagem/logo_paiva_rocha_criativo_1.png">
+
+
+                <script>
+            let mensagemGerada = "";
+
+            function enviarWhatsApp(event) {
+                event.preventDefault();
+
+                const nome = document.getElementById("nome").value;
+                const email = document.getElementById("email").value;
+                const telefone = document.getElementById("telefone").value;
+                const area = document.getElementById("area").value;
+                const mensagem = document.getElementById("mensagem").value;
+
+                mensagemGerada =
+                    `Olá, meu nome é *${nome}*%0A` +
+                    `Telefone: *${telefone}*%0A` +
+                    `E-mail: *${email}*%0A` +
+                    `Área: *${area}*%0A` +
+                    `Mensagem: *${mensagem}*`;
+
+                // principal
+                window.open(
+                    `https://wa.me/5524981191013?text=${mensagemGerada}`,
+                    "_blank"
+                );
+
+                // secundário
+                document.getElementById("btnPaulo").href =
+                    `https://wa.me/5524999891676?text=${mensagemGerada}`;
+
+                document.getElementById("opcaoPaulo").style.display = "block";
+            }
+            </script>
+
 </head>
 <body>
     <!-- Header -->
@@ -203,49 +238,61 @@
                 </div>
                 
                 <div class="conte-caso-form">
-                    <form id="caseForm">
+
+                <form id="caseForm" onsubmit="enviarWhatsApp(event)">
+
+                    <div class="form-group">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" required>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
-                            <label for="nome">Nome Completo</label>
-                            <input type="text" id="nome" name="nome" required>
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" required>
                         </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="email">E-mail</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="telefone">Telefone</label>
-                                <input type="tel" id="telefone" name="telefone" required>
-                            </div>
-                        </div>
-                        
+
                         <div class="form-group">
-                            <label for="area">Área do Direito</label>
-                            <select id="area" name="area" required>
-                                <option value="">Selecione uma área</option>
-                                <option value="civil">Direito Civil</option>
-                                <option value="previdenciario">Direito Previdenciário</option>
-                                <option value="tributario">Direito Tributário</option>
-                                <option value="publico">Direito Público</option>
-                                <option value="consumidor">Direito do Consumidor</option>
-                                <option value="digital">Direito Digital</option>
-                                <option value="trabalhista">Direito Trabalhista</option>
-                                <option value="outro">Outro</option>
-                            </select>
+                            <label for="telefone">Telefone</label>
+                            <input type="tel" id="telefone" required>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="mensagem">Descreva seu Caso</label>
-                            <textarea id="mensagem" name="mensagem" rows="5" required placeholder="Conte-nos detalhadamente sobre sua situação..."></textarea>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-paper-plane"></i>
-                            Enviar Caso
-                        </button>
-                    </form>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="area">Área do Direito</label>
+                        <select id="area" required>
+                            <option value="">Selecione</option>
+                            <option value="Civil">Direito Civil</option>
+                            <option value="Previdenciário">Direito Previdenciário</option>
+                            <option value="Tributário">Direito Tributário</option>
+                            <option value="Público">Direito Público</option>
+                            <option value="Consumidor">Direito do Consumidor</option>
+                            <option value="Digital">Direito Digital</option>
+                            <option value="Trabalhista">Direito Trabalhista</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mensagem">Descreva seu Caso</label>
+                        <textarea id="mensagem" rows="5" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-paper-plane"></i> Enviar Caso
+                    </button>
+
+                </form>
+
+                <!-- opção secundária -->
+                <div id="opcaoPaulo" style="display:none; margin-top:15px;">
+                    <p>Deseja falar também com o <strong>Dr. Paulo</strong>?</p>
+                    <a id="btnPaulo" class="btn-contato" target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Dr. Paulo
+                    </a>
+                </div>
+
+                </div>
+
                 </div>
             </div>
         </div>

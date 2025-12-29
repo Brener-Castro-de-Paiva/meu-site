@@ -532,6 +532,21 @@ body {
 .btn-block i {
     font-size: 1.2rem;
 }
+.btn-contato {
+    background: #25D366;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-contato:hover {
+    background: #1ebe5d;
+    color: #fff;
+}
 
 /* ========================================
    SOBRE (INDEX - PRÉVIA)
