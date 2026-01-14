@@ -1,4 +1,4 @@
-name: Deploy via FTP Locaweb
+name: Deploy via FTP
 
 on:
   push:
@@ -9,10 +9,16 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-
+    
     steps:
       - uses: actions/checkout@v4
-
+      
+      - name: Verificar conteúdo da pasta docs
+        run: |
+          echo "=== CONTEÚDO DA PASTA docs/ ==="
+          ls -la docs/
+          echo "================================"
+      
       - name: FTP Deploy Locaweb
         uses: locaweb/ftp-deploy@1.0.0
         with:
