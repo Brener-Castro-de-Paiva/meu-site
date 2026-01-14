@@ -13,12 +13,24 @@ jobs:
       - name: Baixar código do repositório
         uses: actions/checkout@v4
 
+      - name: Verificar arquivos
+        run: |
+          echo "=== ESTRUTURA docs/ ==="
+          find docs/ -type f | head -20
+          echo "Total de arquivos em docs/: $(find docs/ -type f | wc -l)"
+
       - name: Enviar arquivos via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          port: 21
+          server: "ftp.paivaerocha.com.br"
+          username: "paivaerocha1"
+          password: "NerbreFtp07!"
           local-dir: docs/
-          server-dir: /home/paivaerocha1/
+          server-dir: /home/paivaerocha1/public_html/
+          port: 21
+          exclude: |
+            .gitattributes
+            LICENSE
+            README.md
+            index.txt
+          ftp-debug: true
