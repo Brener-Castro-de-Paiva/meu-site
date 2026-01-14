@@ -3,14 +3,14 @@
 // ========================================
 
 // ⚠️ IMPORTANTE: Substitua pela sua SITE KEY do Google reCAPTCHA
-const RECAPTCHA_SITE_KEY = '6Lct2kksAAAAAJ7euOtaYBoM0_8bWWx6HRTWguah ';
+const RECAPTCHA_SITE_KEY = '6Lct2kksAAAAAJ7euOtaYBoM0_8bWWx6HRTWguah';
 
 // ========================================
 // CONFIGURAÇÃO DO EMAILJS
 // ========================================
 
 // ⚠️ IMPORTANTE: Substitua pelas suas credenciais do EmailJS
-const EMAILJS_PUBLIC_KEY = '6Lct2kksAAAAAJ7euOtaYBoM0_8bWWx6HRTWguah ';
+const EMAILJS_PUBLIC_KEY = 'IqHDimQLY60CZtTjj';
 const EMAILJS_SERVICE_ID = 'service_w0gdkhf';
 const EMAILJS_TEMPLATE_ID = 'template_d16liqn';
 
