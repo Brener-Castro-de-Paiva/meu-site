@@ -1,4 +1,4 @@
-name: Deploy via FTP
+name: Deploy via FTP Locaweb
 
 on:
   push:
@@ -7,21 +7,17 @@ on:
 
 jobs:
   deploy:
+    name: Deploy
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar código do repositório
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Enviar arquivos via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: FTP Deploy Locaweb
+        uses: locaweb/ftp-deploy@1.0.0
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          port: 21
-          passive: true
-          local-dir: docs/
-          server-dir: /
-          log-level: verbose
+          host: ${{ secrets.HOST }}
+          user: ${{ secrets.USER }}
+          password: ${{ secrets.PASS }}
+          localDir: "docs"
 
