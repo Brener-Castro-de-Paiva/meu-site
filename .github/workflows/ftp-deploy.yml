@@ -16,9 +16,9 @@ jobs:
       - name: Enviar arquivos via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.HOST }}          # ← Corrigido: era FTP_HOST
-          username: ${{ secrets.USER }}        # ← Corrigido: era FTP_USER
-          password: ${{ secrets.PASS }}        # ← Corrigido: era FTP_PASS
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          port: 21
           local-dir: docs/
           server-dir: /home/paivaerocha1/
-          port: 21
