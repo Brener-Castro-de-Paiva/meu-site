@@ -18,40 +18,11 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" href="imagem/logo_paiva_rocha_criativo_1.png">
 
-
-                <script>
-            let mensagemGerada = "";
-
-            function enviarWhatsApp(event) {
-                event.preventDefault();
-
-                const nome = document.getElementById("nome").value;
-                const email = document.getElementById("email").value;
-                const telefone = document.getElementById("telefone").value;
-                const area = document.getElementById("area").value;
-                const mensagem = document.getElementById("mensagem").value;
-
-                mensagemGerada =
-                    `Olá, meu nome é *${nome}*%0A` +
-                    `Telefone: *${telefone}*%0A` +
-                    `E-mail: *${email}*%0A` +
-                    `Área: *${area}*%0A` +
-                    `Mensagem: *${mensagem}*`;
-
-                // principal
-                window.open(
-                    `https://wa.me/5524981191013?text=${mensagemGerada}`,
-                    "_blank"
-                );
-
-                // secundário
-                document.getElementById("btnPaulo").href =
-                    `https://wa.me/5524999891676?text=${mensagemGerada}`;
-
-                document.getElementById("opcaoPaulo").style.display = "block";
-            }
-            </script>
-
+    <!-- ✅ Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lct2kksAAAAAJ7euOtaYBoM0_8bWWx6HRTWguah "></script>
+    
+    <!-- ✅ NOVO: EmailJS para envio de emails -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -75,7 +46,6 @@
                         <li><a href="#contato" class="nav-link">Contato</a></li>
                     </ul>
                 
-                    <!-- CORREÇÃO: Contatos separados -->
                     <div class="contact-buttons">
                         <a href="https://wa.me/5524981191013" target="_blank" class="btn-contact">
                             <i class="fab fa-whatsapp"></i>
@@ -162,7 +132,6 @@
                     <a href="#conte-seu-caso" class="servico-link">Consultar <i class="fas fa-arrow-right"></i></a>
                 </div>
 
-                <!-- CORREÇÃO: Ícone alterado para Direito Público -->
                 <div class="servico-card">
                     <div class="servico-icon">
                         <i class="fas fa-landmark"></i>
@@ -238,61 +207,86 @@
                 </div>
                 
                 <div class="conte-caso-form">
-
-                <form id="caseForm" onsubmit="enviarWhatsApp(event)">
-
-                    <div class="form-group">
-                        <label for="nome">Nome Completo</label>
-                        <input type="text" id="nome" required>
-                    </div>
-
-                    <div class="form-row">
+                    <form id="caseForm">
                         <div class="form-group">
-                            <label for="email">E-mail</label>
-                            <input type="email" id="email" required>
+                            <label for="nome">Nome Completo</label>
+                            <input type="text" id="nome" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">E-mail</label>
+                                <input type="email" id="email" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="telefone">Telefone</label>
+                                <input type="tel" id="telefone" required>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="telefone">Telefone</label>
-                            <input type="tel" id="telefone" required>
+                            <label for="area">Área do Direito</label>
+                            <select id="area" required>
+                                <option value="">Selecione</option>
+                                <option value="Civil">Direito Civil</option>
+                                <option value="Previdenciário">Direito Previdenciário</option>
+                                <option value="Tributário">Direito Tributário</option>
+                                <option value="Público">Direito Público</option>
+                                <option value="Consumidor">Direito do Consumidor</option>
+                                <option value="Digital">Direito Digital</option>
+                                <option value="Trabalhista">Direito Trabalhista</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mensagem">Descreva seu Caso</label>
+                            <textarea id="mensagem" rows="5" required></textarea>
+                        </div>
+
+                        <div class="recaptcha-info">
+                            <p><i class="fas fa-shield-alt"></i> Protegido por reCAPTCHA</p>
+                            <small>Este site é protegido pelo reCAPTCHA e aplicam-se a <a href="https://policies.google.com/privacy" target="_blank">Política de Privacidade</a> e os <a href="https://policies.google.com/terms" target="_blank">Termos de Serviço</a> do Google.</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-paper-plane"></i> Enviar Caso
+                        </button>
+                    </form>
+
+                    <!-- ✅ NOVO: Opções de contato após envio -->
+                    <div id="contatoOpcoes" style="display:none; margin-top:20px;">
+                        <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <p style="color: #2e7d32; font-weight: 600; margin-bottom: 0.5rem;">
+                                <i class="fas fa-check-circle"></i> Caso enviado com sucesso!
+                            </p>
+                            <p style="color: #558b2f; font-size: 0.9rem; margin: 0;">
+                                Todos os sócios receberam seu caso por e-mail e retornarão em breve.
+                            </p>
+                        </div>
+                        
+                        <p style="font-weight: 600; color: #343a40; margin-bottom: 1rem;">
+                            <i class="fas fa-whatsapp" style="color: #25D366;"></i> 
+                            Precisa de atendimento imediato? Fale com os sócios:
+                        </p>
+                        
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <a id="btnBrener" class="btn-whatsapp" target="_blank">
+                                <i class="fab fa-whatsapp"></i> 
+                                <span>
+                                    <strong>Dr. Brener</strong>
+                                    <small>(24) 98119-1013</small>
+                                </span>
+                            </a>
+                            <a id="btnPaulo" class="btn-whatsapp" target="_blank">
+                                <i class="fab fa-whatsapp"></i> 
+                                <span>
+                                    <strong>Dr. Paulo</strong>
+                                    <small>(24) 99989-1676</small>
+                                </span>
+                            </a>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="area">Área do Direito</label>
-                        <select id="area" required>
-                            <option value="">Selecione</option>
-                            <option value="Civil">Direito Civil</option>
-                            <option value="Previdenciário">Direito Previdenciário</option>
-                            <option value="Tributário">Direito Tributário</option>
-                            <option value="Público">Direito Público</option>
-                            <option value="Consumidor">Direito do Consumidor</option>
-                            <option value="Digital">Direito Digital</option>
-                            <option value="Trabalhista">Direito Trabalhista</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="mensagem">Descreva seu Caso</label>
-                        <textarea id="mensagem" rows="5" required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-paper-plane"></i> Enviar Caso
-                    </button>
-
-                </form>
-
-                <!-- opção secundária -->
-                <div id="opcaoPaulo" style="display:none; margin-top:15px;">
-                    <p>Deseja falar também com o <strong>Dr. Paulo</strong>?</p>
-                    <a id="btnPaulo" class="btn-contato" target="_blank">
-                        <i class="fab fa-whatsapp"></i> WhatsApp Dr. Paulo
-                    </a>
-                </div>
-
-                </div>
-
                 </div>
             </div>
         </div>
@@ -397,7 +391,7 @@
                         </li>
                         <li style="margin-top: 1rem;">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Largo IX de abril, Ed. Cecisa1, 26, Sala 622, Vila Santa Cecília, Volta Redonda/RJ, CEP: 27.260-180.</span>
+                            <span>Largo IX de abril, Ed. Cecisa 1, 26, Sala 622, Vila Santa Cecília, Volta Redonda/RJ, CEP: 27.260-180.</span>
                         </li>
                         <li>
                             <i class="fas fa-clock"></i>
