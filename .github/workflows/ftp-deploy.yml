@@ -13,12 +13,6 @@ jobs:
       - name: Baixar código do repositório
         uses: actions/checkout@v4
 
-      - name: Verificar arquivos
-        run: |
-          echo "=== ESTRUTURA docs/ ==="
-          ls -la docs
-          find docs -type f | head -20
-
       - name: Enviar arquivos via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -28,9 +22,6 @@ jobs:
           port: 21
           passive: true
           local-dir: docs/
-          server-dir: /wwwroot/
+          server-dir: /
           log-level: verbose
-          exclude: |
-            **/.git*
-            **/.github/**
-            README.md
+
