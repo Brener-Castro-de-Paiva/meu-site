@@ -1,23 +1,25 @@
 // ========================================
-// CONFIGURAÇÃO DO RECAPTCHA
+// CONFIGURAÇÃO - MODO HÍBRIDO
 // ========================================
 
-// ⚠️ IMPORTANTE: Substitua pela sua SITE KEY do Google reCAPTCHA
+// ⚠️ ALTERNAR ENTRE GITHUB PAGES E PHP
+const USE_PHP_BACKEND = false; // false = GitHub (EmailJS) | true = PHP
+
+// ⚠️ IMPORTANTE: Substitua pelas suas chaves
 const RECAPTCHA_SITE_KEY = '6Lct2kksAAAAAJ7euOtaYBoM0_8bWWx6HRTWguah';
 
-// ========================================
-// CONFIGURAÇÃO DO EMAILJS
-// ========================================
-
-// ⚠️ IMPORTANTE: Substitua pelas suas credenciais do EmailJS
+// Configuração EmailJS (para GitHub Pages)
 const EMAILJS_PUBLIC_KEY = 'IqHDimQLY60CZtTjj';
 const EMAILJS_SERVICE_ID = 'service_w0gdkhf';
 const EMAILJS_TEMPLATE_ID = 'template_d16liqn';
 
-// Inicializar EmailJS
-(function() {
+// Configuração PHP (para quando migrar)
+const PHP_BACKEND_URL = 'https://seudominio.com.br/enviar-caso.php';
+
+// Inicializar EmailJS apenas se estiver usando GitHub
+if (!USE_PHP_BACKEND && typeof emailjs !== 'undefined') {
     emailjs.init(EMAILJS_PUBLIC_KEY);
-})();
+}
 
 // ========================================
 // MENU MOBILE
@@ -100,7 +102,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // ========================================
-// ANIMAÇÃO DE SCROLL (INTERSECTION OBSERVER)
+// ANIMAÇÃO DE SCROLL
 // ========================================
 
 const observerOptions = {
@@ -125,7 +127,7 @@ document.querySelectorAll('.conte-caso-info, .conte-caso-form, .sobre-image, .so
 });
 
 // ========================================
-// FORMULÁRIO COM EMAIL + WHATSAPP + RECAPTCHA
+// FORMULÁRIO - MODO HÍBRIDO
 // ========================================
 
 const caseForm = document.getElementById('caseForm');
@@ -170,19 +172,19 @@ caseForm.addEventListener('submit', async (e) => {
             throw new Error('Falha na verificação de segurança');
         }
         
-        console.log('✅ Verificação de segurança concluída');
+        console.log('✅ Token reCAPTCHA gerado');
         
-        // PASSO 2: Enviar por EMAIL
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e-mail...';
+        // PASSO 2: Escolher método de envio
+        if (USE_PHP_BACKEND) {
+            // MODO PHP: Validação backend real
+            await enviarViaPHP(token, formData, submitBtn);
+        } else {
+            // MODO GITHUB: EmailJS direto
+            await enviarViaEmailJS(formData, submitBtn);
+        }
         
-        await enviarEmail(formData);
-        
-        console.log('✅ E-mail enviado com sucesso');
-        
-        // PASSO 3: Preparar links do WhatsApp
+        // PASSO 3: Mostrar opções de contato
         const whatsappMessage = criarMensagemWhatsApp(formData);
-        
-        // Mostrar opções de contato
         mostrarOpcoesContato(whatsappMessage);
         
         // Mostrar mensagem de sucesso
@@ -204,17 +206,9 @@ caseForm.addEventListener('submit', async (e) => {
         }, 500);
         
     } catch (error) {
-        console.error('Erro ao processar formulário:', error);
+        console.error('❌ Erro ao processar formulário:', error);
         
-        let errorMessage = '❌ Erro ao enviar. ';
-        
-        if (error.message.includes('segurança')) {
-            errorMessage += 'Falha na verificação de segurança.';
-        } else if (error.message.includes('email')) {
-            errorMessage += 'Falha ao enviar e-mail.';
-        } else {
-            errorMessage += 'Tente novamente mais tarde.';
-        }
+        let errorMessage = '❌ ' + (error.message || 'Erro ao enviar. Tente novamente mais tarde.');
         
         showNotification(errorMessage, 'error');
         
@@ -245,7 +239,6 @@ async function executeRecaptcha(action) {
             throw new Error('Token não gerado');
         }
         
-        console.log('✅ reCAPTCHA token gerado');
         return token;
         
     } catch (error) {
@@ -255,40 +248,61 @@ async function executeRecaptcha(action) {
 }
 
 // ========================================
-// FUNÇÃO PARA ENVIAR EMAIL (EmailJS)
+// ENVIAR VIA PHP (VALIDAÇÃO BACKEND REAL)
 // ========================================
 
-async function enviarEmail(formData) {
-    try {
-        // Parâmetros do template
-        const templateParams = {
-            to_email: 'paivaerocha123@gmail.com',
-            from_name: formData.nome,
-            from_email: formData.email,
-            phone: formData.telefone,
-            area: formData.area,
-            message: formData.mensagem,
-            date: formData.data
-        };
-        
-        // Enviar email via EmailJS
-        const response = await emailjs.send(
-            EMAILJS_SERVICE_ID,
-            EMAILJS_TEMPLATE_ID,
-            templateParams
-        );
-        
-        if (response.status !== 200) {
-            throw new Error('Erro ao enviar e-mail');
-        }
-        
-        console.log('✅ EmailJS response:', response);
-        return response;
-        
-    } catch (error) {
-        console.error('Erro ao enviar email:', error);
-        throw new Error('Falha ao enviar e-mail');
+async function enviarViaPHP(token, formData, submitBtn) {
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando no servidor...';
+    
+    const response = await fetch(PHP_BACKEND_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            token: token,
+            formData: formData
+        })
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+        console.error('❌ Erro do servidor:', result);
+        throw new Error(result.error || 'Erro ao enviar caso');
     }
+    
+    console.log('✅ Validação backend bem-sucedida - Score:', result.score);
+}
+
+// ========================================
+// ENVIAR VIA EMAILJS (GITHUB PAGES)
+// ========================================
+
+async function enviarViaEmailJS(formData, submitBtn) {
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e-mail...';
+    
+    const templateParams = {
+        to_email: 'paivaerocha123@gmail.com',
+        from_name: formData.nome,
+        from_email: formData.email,
+        phone: formData.telefone,
+        area: formData.area,
+        message: formData.mensagem,
+        date: formData.data
+    };
+    
+    const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams
+    );
+    
+    if (response.status !== 200) {
+        throw new Error('Erro ao enviar e-mail');
+    }
+    
+    console.log('✅ Email enviado via EmailJS');
 }
 
 // ========================================
@@ -322,15 +336,12 @@ function mostrarOpcoesContato(mensagem) {
     const btnBrener = document.getElementById('btnBrener');
     const btnPaulo = document.getElementById('btnPaulo');
     
-    // Criar URLs do WhatsApp
     const urlBrener = `https://wa.me/5524981191013?text=${encodeURIComponent(mensagem)}`;
     const urlPaulo = `https://wa.me/5524999891676?text=${encodeURIComponent(mensagem)}`;
     
-    // Atualizar links
     btnBrener.href = urlBrener;
     btnPaulo.href = urlPaulo;
     
-    // Mostrar opções
     contatoOpcoes.style.display = 'block';
 }
 
@@ -524,7 +535,8 @@ window.addEventListener('load', () => {
 // ========================================
 
 console.log('%c Paiva & Rocha Advocacia ', 'background: #006d77; color: white; font-size: 20px; padding: 10px;');
-console.log('📧 Sistema de envio por e-mail ativado (EmailJS)');
-console.log('💬 Opções de WhatsApp disponíveis após envio');
-console.log('🛡️ Proteção reCAPTCHA v3 ativada');
+console.log('🔧 Modo:', USE_PHP_BACKEND ? 'PHP Backend' : 'GitHub Pages (EmailJS)');
+console.log('🛡️ reCAPTCHA v3:', USE_PHP_BACKEND ? 'Validação backend' : 'Frontend apenas');
+console.log('📧 Email:', USE_PHP_BACKEND ? 'Via PHP' : 'Via EmailJS');
+console.log('💬 WhatsApp: Disponível após envio');
 console.log('📱 Contato: (24) 98119-1013');
