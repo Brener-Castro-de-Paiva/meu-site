@@ -532,6 +532,7 @@ body {
 .btn-block i {
     font-size: 1.2rem;
 }
+
 .btn-contato {
     background: #25D366;
     color: #fff;
@@ -861,6 +862,11 @@ body {
     margin-bottom: 1.5rem;
 }
 
+/* CORREÇÃO APLICADA: Logo h3 visível no footer */
+.footer-col .logo-text h3 {
+    color: var(--white);
+}
+
 .footer-col p {
     color: rgba(255,255,255,0.8);
     margin-bottom: 1.5rem;
@@ -909,18 +915,28 @@ body {
     padding-left: 5px;
 }
 
+/* CORREÇÃO APLICADA: Ícone do endereço alinhado no topo */
 .contact-info li {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
 }
 
+/* CORREÇÃO APLICADA: Texto do endereço justificado */
+.contact-info li span {
+    text-align: justify;
+    line-height: 1.6;
+}
+
+/* CORREÇÃO APLICADA: Ícone fixo e alinhado */
 .contact-info i {
     color: var(--primary-color);
     font-size: 1.1rem;
     width: 20px;
     text-align: center;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
 }
 
 .footer-bottom {
