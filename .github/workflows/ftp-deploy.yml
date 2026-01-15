@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main  # Apenas deploys da branch main
-
 jobs:
   deploy:
     name: Deploy
@@ -18,5 +17,5 @@ jobs:
         user: ${{ secrets.USER }}
         password: ${{ secrets.PASS }}
         localDir: "docs"
-        remoteDir: "/home/paivaerocha1/"  # Pasta raiz da Locaweb
+        remoteDir: "/home/paivaerocha1/public_html"  # MUDANÇA AQUI
         forceSsl: false  # Locaweb usa FTP padrão, não FTPS
