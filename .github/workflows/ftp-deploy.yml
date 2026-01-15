@@ -17,4 +17,4 @@ jobs:
         username: ${{ secrets.USER }}
         password: ${{ secrets.PASS }}
         local-dir: ./docs/
-        server-dir: /home/paivaerocha1/public_html/
+        server-dir: ./public_html/
