@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Forçar HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Forçar domínio sem www
+RewriteCond %{HTTP_HOST} ^www\.paivaerocha\.com\.br$ [NC]
+RewriteRule ^ https://paivaerocha.com.br%{REQUEST_URI} [L,R=301]
