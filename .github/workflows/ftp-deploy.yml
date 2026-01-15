@@ -2,7 +2,7 @@ name: Deploy via ftp
 on:
   push:
     branches:
-      - main  # Apenas deploys da branch main
+      - main
 jobs:
   deploy:
     name: Deploy
@@ -10,12 +10,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: FTP Deploy Locaweb
-      uses: locaweb/ftp-deploy@1.0.0
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:
-        host: ${{ secrets.HOST }}
-        user: ${{ secrets.USER }}
+        server: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
         password: ${{ secrets.PASS }}
-        localDir: "docs"
-        remoteDir: "/home/paivaerocha1/public_html"  # MUDANÇA AQUI
-        forceSsl: false  # Locaweb usa FTP padrão, não FTPS
+        local-dir: ./docs/
+        server-dir: /home/paivaerocha1/public_html/
