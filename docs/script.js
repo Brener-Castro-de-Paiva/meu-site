@@ -16,9 +16,17 @@ const EMAILJS_TEMPLATE_ID = 'template_d16liqn';
 // Configuração PHP (para quando migrar)
 const PHP_BACKEND_URL = 'https://paivaerocha.com.br/enviar-caso.php';
 
-// Inicializar EmailJS apenas se estiver usando GitHub
-if (!USE_PHP_BACKEND && typeof emailjs !== 'undefined') {
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+// Inicializar EmailJS apenas se estiver usando GitHub E emailjs estiver disponível
+if (!USE_PHP_BACKEND) {
+    // Aguardar o emailjs carregar
+    window.addEventListener('load', () => {
+        if (typeof emailjs !== 'undefined') {
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+            console.log('✅ EmailJS inicializado');
+        } else {
+            console.warn('⚠️ EmailJS não carregado - verifique o script no HTML');
+        }
+    });
 }
 
 // ========================================
@@ -281,6 +289,11 @@ async function enviarViaPHP(token, formData, submitBtn) {
 
 async function enviarViaEmailJS(formData, submitBtn) {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e-mail...';
+    
+    // Verificar se emailjs está disponível
+    if (typeof emailjs === 'undefined') {
+        throw new Error('EmailJS não está carregado. Verifique o script no HTML.');
+    }
     
     const templateParams = {
         to_email: 'paivaerocha123@gmail.com',
