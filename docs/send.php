@@ -6,7 +6,7 @@
 // ========================================
 
 // ⚠️ IMPORTANTE: Substitua pelas suas chaves
-define('RECAPTCHA_SECRET_KEY', 'SUA_SECRET_KEY_AQUI');
+define('RECAPTCHA_SECRET_KEY', '6Lct2kksAAAAAJQ5_qDkyWgSC3ywnVMmCMEH-S1s');
 define('EMAIL_DESTINO', 'paivaerocha123@gmail.com');
 define('SCORE_MINIMO', 0.5); // Ajuste conforme necessário
 

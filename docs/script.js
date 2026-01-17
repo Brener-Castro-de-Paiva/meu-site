@@ -3,7 +3,7 @@
 // ========================================
 
 // ⚠️ ALTERNAR ENTRE GITHUB PAGES E PHP
-const USE_PHP_BACKEND = false; // false = GitHub (EmailJS) | true = PHP
+const USE_PHP_BACKEND = true; // false = GitHub (EmailJS) | true = PHP
 
 // ⚠️ IMPORTANTE: Substitua pelas suas chaves
 const RECAPTCHA_SITE_KEY = '6Lct2kksAAAAAJ7euOtaYBoM0_8bWWx6HRTWguah';
@@ -14,7 +14,7 @@ const EMAILJS_SERVICE_ID = 'service_w0gdkhf';
 const EMAILJS_TEMPLATE_ID = 'template_d16liqn';
 
 // Configuração PHP (para quando migrar)
-const PHP_BACKEND_URL = 'https://seudominio.com.br/enviar-caso.php';
+const PHP_BACKEND_URL = 'https://paivaerocha.com.br/enviar-caso.php';
 
 // Inicializar EmailJS apenas se estiver usando GitHub
 if (!USE_PHP_BACKEND && typeof emailjs !== 'undefined') {
