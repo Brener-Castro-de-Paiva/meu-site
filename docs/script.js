@@ -3,7 +3,8 @@
 // ========================================
 
 // ⚠️ ALTERNAR ENTRE GITHUB PAGES E PHP
-const USE_PHP_BACKEND = true; // false = GitHub (EmailJS) | true = PHP
+// true = usa PHP | false = usa EmailJS (GitHub Pages)
+const USE_PHP_BACKEND = true; // Mude para false se usar GitHub Pages
 
 // ⚠️ IMPORTANTE: Substitua pelas suas chaves
 const RECAPTCHA_SITE_KEY = '6Lct2kksAAAAAJ7euOtaYBoM0_8bWWx6HRTWguah';
@@ -16,52 +17,59 @@ const EMAILJS_TEMPLATE_ID = 'template_d16liqn';
 // Configuração PHP (para quando migrar)
 const PHP_BACKEND_URL = 'https://paivaerocha.com.br/enviar-caso.php';
 
-// Inicializar EmailJS apenas se estiver usando GitHub E emailjs estiver disponível
-if (!USE_PHP_BACKEND) {
-    // Aguardar o emailjs carregar
-    window.addEventListener('load', () => {
-        if (typeof emailjs !== 'undefined') {
-            emailjs.init(EMAILJS_PUBLIC_KEY);
-            console.log('✅ EmailJS inicializado');
-        } else {
-            console.warn('⚠️ EmailJS não carregado - verifique o script no HTML');
-        }
-    });
+// ========================================
+// INICIALIZAR EMAILJS (APENAS SE NECESSÁRIO)
+// ========================================
+
+if (!USE_PHP_BACKEND && typeof emailjs !== 'undefined') {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    console.log('✅ EmailJS inicializado para GitHub Pages');
 }
 
 // ========================================
-// MENU MOBILE
+// ELEMENTOS DO DOM
 // ========================================
 
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const nav = document.getElementById('nav');
 const navLinks = document.querySelectorAll('.nav-link');
+const header = document.getElementById('header');
+const caseForm = document.getElementById('caseForm');
+const telefoneInput = document.getElementById('telefone');
+const mensagemTextarea = document.getElementById('mensagem');
+const maxChars = 1000;
 
-mobileMenuBtn.addEventListener('click', () => {
-    mobileMenuBtn.classList.toggle('active');
-    nav.classList.toggle('active');
-});
+// ========================================
+// MENU MOBILE
+// ========================================
 
-navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-        mobileMenuBtn.classList.remove('active');
-        nav.classList.remove('active');
+if (mobileMenuBtn && nav) {
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenuBtn.classList.toggle('active');
+        nav.classList.toggle('active');
     });
-});
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenuBtn.classList.remove('active');
+            nav.classList.remove('active');
+        });
+    });
+}
 
 // ========================================
 // HEADER SCROLL
 // ========================================
 
-const header = document.getElementById('header');
-
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        header.classList.add('scrolled');
-    } else {
-        header.classList.remove('scrolled');
-    }
-});
+if (header) {
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+}
 
 // ========================================
 // NAVEGAÇÃO ATIVA
@@ -135,96 +143,96 @@ document.querySelectorAll('.conte-caso-info, .conte-caso-form, .sobre-image, .so
 });
 
 // ========================================
-// FORMULÁRIO - MODO HÍBRIDO
+// FORMULÁRIO - ENVIO
 // ========================================
 
-const caseForm = document.getElementById('caseForm');
-
-caseForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // Coletar dados do formulário
-    const formData = {
-        nome: document.getElementById('nome').value,
-        email: document.getElementById('email').value,
-        telefone: document.getElementById('telefone').value,
-        area: document.getElementById('area').value,
-        mensagem: document.getElementById('mensagem').value,
-        data: new Date().toLocaleString('pt-BR')
-    };
-    
-    // Validação básica
-    if (!formData.nome || !formData.email || !formData.telefone || !formData.area || !formData.mensagem) {
-        showNotification('Por favor, preencha todos os campos', 'error');
-        return;
-    }
-    
-    // Validar email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-        showNotification('Por favor, insira um e-mail válido', 'error');
-        return;
-    }
-    
-    // Desabilitar botão durante envio
-    const submitBtn = caseForm.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando segurança...';
-    
-    try {
-        // PASSO 1: Executar reCAPTCHA
-        const token = await executeRecaptcha('submit_form');
+if (caseForm) {
+    caseForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        if (!token) {
-            throw new Error('Falha na verificação de segurança');
+        // Coletar dados do formulário
+        const formData = {
+            nome: document.getElementById('nome').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            telefone: document.getElementById('telefone').value.trim(),
+            area: document.getElementById('area').value,
+            mensagem: document.getElementById('mensagem').value.trim(),
+            data: new Date().toLocaleString('pt-BR')
+        };
+        
+        // Validação básica
+        if (!formData.nome || !formData.email || !formData.telefone || !formData.area || !formData.mensagem) {
+            showNotification('Por favor, preencha todos os campos', 'error');
+            return;
         }
         
-        console.log('✅ Token reCAPTCHA gerado');
-        
-        // PASSO 2: Escolher método de envio
-        if (USE_PHP_BACKEND) {
-            // MODO PHP: Validação backend real
-            await enviarViaPHP(token, formData, submitBtn);
-        } else {
-            // MODO GITHUB: EmailJS direto
-            await enviarViaEmailJS(formData, submitBtn);
+        // Validar email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            showNotification('Por favor, insira um e-mail válido', 'error');
+            return;
         }
         
-        // PASSO 3: Mostrar opções de contato
-        const whatsappMessage = criarMensagemWhatsApp(formData);
-        mostrarOpcoesContato(whatsappMessage);
+        // Desabilitar botão durante envio
+        const submitBtn = caseForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
         
-        // Mostrar mensagem de sucesso
-        showNotification('✅ Caso enviado com sucesso! Todos os sócios receberam seu e-mail.', 'success');
-        
-        // Resetar formulário
-        caseForm.reset();
-        
-        // Restaurar botão
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-        
-        // Scroll suave para as opções
-        setTimeout(() => {
-            document.getElementById('contatoOpcoes').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'nearest' 
-            });
-        }, 500);
-        
-    } catch (error) {
-        console.error('❌ Erro ao processar formulário:', error);
-        
-        let errorMessage = '❌ ' + (error.message || 'Erro ao enviar. Tente novamente mais tarde.');
-        
-        showNotification(errorMessage, 'error');
-        
-        // Restaurar botão
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-    }
-});
+        try {
+            // PASSO 1: Executar reCAPTCHA
+            const token = await executeRecaptcha('submit_form');
+            
+            if (!token) {
+                throw new Error('Falha na verificação de segurança');
+            }
+            
+            console.log('✅ Token reCAPTCHA gerado');
+            
+            // PASSO 2: Escolher método de envio
+            if (USE_PHP_BACKEND) {
+                // MODO PHP: Validação backend real
+                await enviarViaPHP(token, formData);
+            } else {
+                // MODO GITHUB: EmailJS direto
+                await enviarViaEmailJS(formData);
+            }
+            
+            // PASSO 3: Mostrar opções de contato
+            const whatsappMessage = criarMensagemWhatsApp(formData);
+            mostrarOpcoesContato(whatsappMessage);
+            
+            // Mostrar mensagem de sucesso
+            showNotification('✅ Caso enviado com sucesso! Todos os sócios receberam seu e-mail.', 'success');
+            
+            // Resetar formulário
+            caseForm.reset();
+            
+            // Scroll suave para as opções
+            setTimeout(() => {
+                const contatoOpcoes = document.getElementById('contatoOpcoes');
+                if (contatoOpcoes) {
+                    contatoOpcoes.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest' 
+                    });
+                }
+            }, 500);
+            
+        } catch (error) {
+            console.error('❌ Erro ao processar formulário:', error);
+            
+            let errorMessage = '❌ ' + (error.message || 'Erro ao enviar. Tente novamente mais tarde.');
+            
+            showNotification(errorMessage, 'error');
+            
+        } finally {
+            // Restaurar botão
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+}
 
 // ========================================
 // FUNÇÃO PARA EXECUTAR RECAPTCHA V3
@@ -233,8 +241,7 @@ caseForm.addEventListener('submit', async (e) => {
 async function executeRecaptcha(action) {
     try {
         if (typeof grecaptcha === 'undefined') {
-            console.error('reCAPTCHA não carregado');
-            throw new Error('Sistema de segurança não disponível');
+            throw new Error('reCAPTCHA não carregado. Recarregue a página.');
         }
         
         await new Promise((resolve) => {
@@ -259,13 +266,12 @@ async function executeRecaptcha(action) {
 // ENVIAR VIA PHP (VALIDAÇÃO BACKEND REAL)
 // ========================================
 
-async function enviarViaPHP(token, formData, submitBtn) {
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando no servidor...';
-    
+async function enviarViaPHP(token, formData) {
     const response = await fetch(PHP_BACKEND_URL, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         },
         body: JSON.stringify({
             token: token,
@@ -281,15 +287,14 @@ async function enviarViaPHP(token, formData, submitBtn) {
     }
     
     console.log('✅ Validação backend bem-sucedida - Score:', result.score);
+    return result;
 }
 
 // ========================================
 // ENVIAR VIA EMAILJS (GITHUB PAGES)
 // ========================================
 
-async function enviarViaEmailJS(formData, submitBtn) {
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e-mail...';
-    
+async function enviarViaEmailJS(formData) {
     // Verificar se emailjs está disponível
     if (typeof emailjs === 'undefined') {
         throw new Error('EmailJS não está carregado. Verifique o script no HTML.');
@@ -316,6 +321,7 @@ async function enviarViaEmailJS(formData, submitBtn) {
     }
     
     console.log('✅ Email enviado via EmailJS');
+    return response;
 }
 
 // ========================================
@@ -324,7 +330,7 @@ async function enviarViaEmailJS(formData, submitBtn) {
 
 function criarMensagemWhatsApp(formData) {
     return `
-*🔔 Novo Caso*
+*🔔 Novo Caso Jurídico - Paiva & Rocha Advocacia*
 ━━━━━━━━━━━━━━━━━━━━
 
 👤 *Nome:* ${formData.nome}
@@ -332,11 +338,11 @@ function criarMensagemWhatsApp(formData) {
 📱 *Telefone:* ${formData.telefone}
 ⚖️ *Área:* ${formData.area}
 
-📝 *Mensagem:*
+📝 *Descrição do Caso:*
 ${formData.mensagem}
 
 ━━━━━━━━━━━━━━━━━━━━
-🕐 *${formData.data}*
+🕐 *Enviado em:* ${formData.data}
     `.trim();
 }
 
@@ -348,6 +354,8 @@ function mostrarOpcoesContato(mensagem) {
     const contatoOpcoes = document.getElementById('contatoOpcoes');
     const btnBrener = document.getElementById('btnBrener');
     const btnPaulo = document.getElementById('btnPaulo');
+    
+    if (!contatoOpcoes || !btnBrener || !btnPaulo) return;
     
     const urlBrener = `https://wa.me/5524981191013?text=${encodeURIComponent(mensagem)}`;
     const urlPaulo = `https://wa.me/5524999891676?text=${encodeURIComponent(mensagem)}`;
@@ -363,10 +371,9 @@ function mostrarOpcoesContato(mensagem) {
 // ========================================
 
 function showNotification(message, type = 'success') {
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
+    // Remover notificações existentes
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
     
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
@@ -375,106 +382,96 @@ function showNotification(message, type = 'success') {
         <span>${message}</span>
     `;
     
+    // Estilos da notificação
     Object.assign(notification.style, {
         position: 'fixed',
-        top: '100px',
+        top: '80px',
         right: '20px',
-        padding: '1rem 1.5rem',
+        padding: '15px 20px',
         background: type === 'success' ? '#10b981' : '#ef4444',
         color: 'white',
-        borderRadius: '10px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.75rem',
+        gap: '10px',
         zIndex: '9999',
-        animation: 'slideInRight 0.3s ease',
-        fontSize: '1rem',
+        animation: 'slideIn 0.3s ease',
+        fontSize: '14px',
         fontWeight: '500',
-        maxWidth: '90%'
+        maxWidth: '400px'
     });
     
     document.body.appendChild(notification);
     
+    // Adicionar animação CSS
     const style = document.createElement('style');
     style.textContent = `
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
         }
     `;
     document.head.appendChild(style);
     
+    // Remover após 5 segundos
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
+        notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 5000);
 }
 
 // ========================================
-// MÁSCARAS DE TELEFONE
+// MÁSCARA DE TELEFONE
 // ========================================
 
-const telefoneInput = document.getElementById('telefone');
-
-telefoneInput.addEventListener('input', (e) => {
-    let value = e.target.value.replace(/\D/g, '');
-    
-    if (value.length <= 10) {
-        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-    } else {
-        value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-    }
-    
-    e.target.value = value;
-});
+if (telefoneInput) {
+    telefoneInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        if (value.length <= 10) {
+            value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+        } else {
+            value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+        }
+        
+        e.target.value = value;
+    });
+}
 
 // ========================================
 // CONTADOR DE CARACTERES NO TEXTAREA
 // ========================================
 
-const mensagemTextarea = document.getElementById('mensagem');
-const maxChars = 1000;
-
-mensagemTextarea.addEventListener('input', (e) => {
-    const currentLength = e.target.value.length;
-    
-    if (currentLength >= maxChars) {
-        e.target.value = e.target.value.substring(0, maxChars);
-    }
-    
-    let counter = mensagemTextarea.parentElement.querySelector('.char-counter');
-    if (!counter) {
-        counter = document.createElement('div');
-        counter.className = 'char-counter';
-        counter.style.cssText = 'text-align: right; font-size: 0.875rem; color: #6c757d; margin-top: 0.25rem;';
-        mensagemTextarea.parentElement.appendChild(counter);
-    }
-    
-    counter.textContent = `${currentLength}/${maxChars} caracteres`;
-    
-    if (currentLength >= maxChars * 0.9) {
-        counter.style.color = '#ef4444';
-    } else {
-        counter.style.color = '#6c757d';
-    }
-});
+if (mensagemTextarea) {
+    mensagemTextarea.addEventListener('input', (e) => {
+        const currentLength = e.target.value.length;
+        
+        if (currentLength >= maxChars) {
+            e.target.value = e.target.value.substring(0, maxChars);
+        }
+        
+        let counter = mensagemTextarea.parentElement.querySelector('.char-counter');
+        if (!counter) {
+            counter = document.createElement('div');
+            counter.className = 'char-counter';
+            counter.style.cssText = 'text-align: right; font-size: 0.875rem; color: #6c757d; margin-top: 0.25rem;';
+            mensagemTextarea.parentElement.appendChild(counter);
+        }
+        
+        counter.textContent = `${currentLength}/${maxChars} caracteres`;
+        
+        if (currentLength >= maxChars * 0.9) {
+            counter.style.color = '#ef4444';
+        } else {
+            counter.style.color = '#6c757d';
+        }
+    });
+}
 
 // ========================================
 // SCROLL TO TOP BUTTON
