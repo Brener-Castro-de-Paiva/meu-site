@@ -3,8 +3,7 @@
 // ========================================
 
 // ⚠️ ALTERNAR ENTRE GITHUB PAGES E PHP
-// true = usa PHP | false = usa EmailJS (GitHub Pages)
-const USE_PHP_BACKEND = true; // Mude para false se usar GitHub Pages
+const USE_PHP_BACKEND = false; // false = GitHub (EmailJS) | true = PHP
 
 // ⚠️ IMPORTANTE: Substitua pelas suas chaves
 const RECAPTCHA_SITE_KEY = '6Lct2kksAAAAAJ7euOtaYBoM0_8bWWx6HRTWguah';
@@ -15,61 +14,46 @@ const EMAILJS_SERVICE_ID = 'service_w0gdkhf';
 const EMAILJS_TEMPLATE_ID = 'template_d16liqn';
 
 // Configuração PHP (para quando migrar)
-const PHP_BACKEND_URL = 'https://paivaerocha.com.br/enviar-caso.php';
+const PHP_BACKEND_URL = 'https://seudominio.com.br/enviar-caso.php';
 
-// ========================================
-// INICIALIZAR EMAILJS (APENAS SE NECESSÁRIO)
-// ========================================
-
+// Inicializar EmailJS apenas se estiver usando GitHub
 if (!USE_PHP_BACKEND && typeof emailjs !== 'undefined') {
     emailjs.init(EMAILJS_PUBLIC_KEY);
-    console.log('✅ EmailJS inicializado para GitHub Pages');
 }
-
-// ========================================
-// ELEMENTOS DO DOM
-// ========================================
-
-const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-const nav = document.getElementById('nav');
-const navLinks = document.querySelectorAll('.nav-link');
-const header = document.getElementById('header');
-const caseForm = document.getElementById('caseForm');
-const telefoneInput = document.getElementById('telefone');
-const mensagemTextarea = document.getElementById('mensagem');
-const maxChars = 1000;
 
 // ========================================
 // MENU MOBILE
 // ========================================
 
-if (mobileMenuBtn && nav) {
-    mobileMenuBtn.addEventListener('click', () => {
-        mobileMenuBtn.classList.toggle('active');
-        nav.classList.toggle('active');
-    });
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const nav = document.getElementById('nav');
+const navLinks = document.querySelectorAll('.nav-link');
 
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            mobileMenuBtn.classList.remove('active');
-            nav.classList.remove('active');
-        });
+mobileMenuBtn.addEventListener('click', () => {
+    mobileMenuBtn.classList.toggle('active');
+    nav.classList.toggle('active');
+});
+
+navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        mobileMenuBtn.classList.remove('active');
+        nav.classList.remove('active');
     });
-}
+});
 
 // ========================================
 // HEADER SCROLL
 // ========================================
 
-if (header) {
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
-    });
-}
+const header = document.getElementById('header');
+
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+    } else {
+        header.classList.remove('scrolled');
+    }
+});
 
 // ========================================
 // NAVEGAÇÃO ATIVA
@@ -143,96 +127,96 @@ document.querySelectorAll('.conte-caso-info, .conte-caso-form, .sobre-image, .so
 });
 
 // ========================================
-// FORMULÁRIO - ENVIO
+// FORMULÁRIO - MODO HÍBRIDO
 // ========================================
 
-if (caseForm) {
-    caseForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+const caseForm = document.getElementById('caseForm');
+
+caseForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Coletar dados do formulário
+    const formData = {
+        nome: document.getElementById('nome').value,
+        email: document.getElementById('email').value,
+        telefone: document.getElementById('telefone').value,
+        area: document.getElementById('area').value,
+        mensagem: document.getElementById('mensagem').value,
+        data: new Date().toLocaleString('pt-BR')
+    };
+    
+    // Validação básica
+    if (!formData.nome || !formData.email || !formData.telefone || !formData.area || !formData.mensagem) {
+        showNotification('Por favor, preencha todos os campos', 'error');
+        return;
+    }
+    
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+        showNotification('Por favor, insira um e-mail válido', 'error');
+        return;
+    }
+    
+    // Desabilitar botão durante envio
+    const submitBtn = caseForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando segurança...';
+    
+    try {
+        // PASSO 1: Executar reCAPTCHA
+        const token = await executeRecaptcha('submit_form');
         
-        // Coletar dados do formulário
-        const formData = {
-            nome: document.getElementById('nome').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            telefone: document.getElementById('telefone').value.trim(),
-            area: document.getElementById('area').value,
-            mensagem: document.getElementById('mensagem').value.trim(),
-            data: new Date().toLocaleString('pt-BR')
-        };
-        
-        // Validação básica
-        if (!formData.nome || !formData.email || !formData.telefone || !formData.area || !formData.mensagem) {
-            showNotification('Por favor, preencha todos os campos', 'error');
-            return;
+        if (!token) {
+            throw new Error('Falha na verificação de segurança');
         }
         
-        // Validar email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            showNotification('Por favor, insira um e-mail válido', 'error');
-            return;
+        console.log('✅ Token reCAPTCHA gerado');
+        
+        // PASSO 2: Escolher método de envio
+        if (USE_PHP_BACKEND) {
+            // MODO PHP: Validação backend real
+            await enviarViaPHP(token, formData, submitBtn);
+        } else {
+            // MODO GITHUB: EmailJS direto
+            await enviarViaEmailJS(formData, submitBtn);
         }
         
-        // Desabilitar botão durante envio
-        const submitBtn = caseForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        // PASSO 3: Mostrar opções de contato
+        const whatsappMessage = criarMensagemWhatsApp(formData);
+        mostrarOpcoesContato(whatsappMessage);
         
-        try {
-            // PASSO 1: Executar reCAPTCHA
-            const token = await executeRecaptcha('submit_form');
-            
-            if (!token) {
-                throw new Error('Falha na verificação de segurança');
-            }
-            
-            console.log('✅ Token reCAPTCHA gerado');
-            
-            // PASSO 2: Escolher método de envio
-            if (USE_PHP_BACKEND) {
-                // MODO PHP: Validação backend real
-                await enviarViaPHP(token, formData);
-            } else {
-                // MODO GITHUB: EmailJS direto
-                await enviarViaEmailJS(formData);
-            }
-            
-            // PASSO 3: Mostrar opções de contato
-            const whatsappMessage = criarMensagemWhatsApp(formData);
-            mostrarOpcoesContato(whatsappMessage);
-            
-            // Mostrar mensagem de sucesso
-            showNotification('✅ Caso enviado com sucesso! Todos os sócios receberam seu e-mail.', 'success');
-            
-            // Resetar formulário
-            caseForm.reset();
-            
-            // Scroll suave para as opções
-            setTimeout(() => {
-                const contatoOpcoes = document.getElementById('contatoOpcoes');
-                if (contatoOpcoes) {
-                    contatoOpcoes.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'nearest' 
-                    });
-                }
-            }, 500);
-            
-        } catch (error) {
-            console.error('❌ Erro ao processar formulário:', error);
-            
-            let errorMessage = '❌ ' + (error.message || 'Erro ao enviar. Tente novamente mais tarde.');
-            
-            showNotification(errorMessage, 'error');
-            
-        } finally {
-            // Restaurar botão
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }
-    });
-}
+        // Mostrar mensagem de sucesso
+        showNotification('✅ Caso enviado com sucesso! Todos os sócios receberam seu e-mail.', 'success');
+        
+        // Resetar formulário
+        caseForm.reset();
+        
+        // Restaurar botão
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        
+        // Scroll suave para as opções
+        setTimeout(() => {
+            document.getElementById('contatoOpcoes').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }, 500);
+        
+    } catch (error) {
+        console.error('❌ Erro ao processar formulário:', error);
+        
+        let errorMessage = '❌ ' + (error.message || 'Erro ao enviar. Tente novamente mais tarde.');
+        
+        showNotification(errorMessage, 'error');
+        
+        // Restaurar botão
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+});
 
 // ========================================
 // FUNÇÃO PARA EXECUTAR RECAPTCHA V3
@@ -241,7 +225,8 @@ if (caseForm) {
 async function executeRecaptcha(action) {
     try {
         if (typeof grecaptcha === 'undefined') {
-            throw new Error('reCAPTCHA não carregado. Recarregue a página.');
+            console.error('reCAPTCHA não carregado');
+            throw new Error('Sistema de segurança não disponível');
         }
         
         await new Promise((resolve) => {
@@ -266,12 +251,13 @@ async function executeRecaptcha(action) {
 // ENVIAR VIA PHP (VALIDAÇÃO BACKEND REAL)
 // ========================================
 
-async function enviarViaPHP(token, formData) {
+async function enviarViaPHP(token, formData, submitBtn) {
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando no servidor...';
+    
     const response = await fetch(PHP_BACKEND_URL, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             token: token,
@@ -287,18 +273,14 @@ async function enviarViaPHP(token, formData) {
     }
     
     console.log('✅ Validação backend bem-sucedida - Score:', result.score);
-    return result;
 }
 
 // ========================================
 // ENVIAR VIA EMAILJS (GITHUB PAGES)
 // ========================================
 
-async function enviarViaEmailJS(formData) {
-    // Verificar se emailjs está disponível
-    if (typeof emailjs === 'undefined') {
-        throw new Error('EmailJS não está carregado. Verifique o script no HTML.');
-    }
+async function enviarViaEmailJS(formData, submitBtn) {
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e-mail...';
     
     const templateParams = {
         to_email: 'paivaerocha123@gmail.com',
@@ -321,7 +303,6 @@ async function enviarViaEmailJS(formData) {
     }
     
     console.log('✅ Email enviado via EmailJS');
-    return response;
 }
 
 // ========================================
@@ -330,7 +311,7 @@ async function enviarViaEmailJS(formData) {
 
 function criarMensagemWhatsApp(formData) {
     return `
-*🔔 Novo Caso Jurídico - Paiva & Rocha Advocacia*
+*🔔 Novo Caso*
 ━━━━━━━━━━━━━━━━━━━━
 
 👤 *Nome:* ${formData.nome}
@@ -338,11 +319,11 @@ function criarMensagemWhatsApp(formData) {
 📱 *Telefone:* ${formData.telefone}
 ⚖️ *Área:* ${formData.area}
 
-📝 *Descrição do Caso:*
+📝 *Mensagem:*
 ${formData.mensagem}
 
 ━━━━━━━━━━━━━━━━━━━━
-🕐 *Enviado em:* ${formData.data}
+🕐 *${formData.data}*
     `.trim();
 }
 
@@ -354,8 +335,6 @@ function mostrarOpcoesContato(mensagem) {
     const contatoOpcoes = document.getElementById('contatoOpcoes');
     const btnBrener = document.getElementById('btnBrener');
     const btnPaulo = document.getElementById('btnPaulo');
-    
-    if (!contatoOpcoes || !btnBrener || !btnPaulo) return;
     
     const urlBrener = `https://wa.me/5524981191013?text=${encodeURIComponent(mensagem)}`;
     const urlPaulo = `https://wa.me/5524999891676?text=${encodeURIComponent(mensagem)}`;
@@ -371,9 +350,10 @@ function mostrarOpcoesContato(mensagem) {
 // ========================================
 
 function showNotification(message, type = 'success') {
-    // Remover notificações existentes
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(n => n.remove());
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
     
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
@@ -382,96 +362,106 @@ function showNotification(message, type = 'success') {
         <span>${message}</span>
     `;
     
-    // Estilos da notificação
     Object.assign(notification.style, {
         position: 'fixed',
-        top: '80px',
+        top: '100px',
         right: '20px',
-        padding: '15px 20px',
+        padding: '1rem 1.5rem',
         background: type === 'success' ? '#10b981' : '#ef4444',
         color: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        borderRadius: '10px',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
+        gap: '0.75rem',
         zIndex: '9999',
-        animation: 'slideIn 0.3s ease',
-        fontSize: '14px',
+        animation: 'slideInRight 0.3s ease',
+        fontSize: '1rem',
         fontWeight: '500',
-        maxWidth: '400px'
+        maxWidth: '90%'
     });
     
     document.body.appendChild(notification);
     
-    // Adicionar animação CSS
     const style = document.createElement('style');
     style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
         }
     `;
     document.head.appendChild(style);
     
-    // Remover após 5 segundos
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
+        notification.style.animation = 'slideOutRight 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 5000);
 }
 
 // ========================================
-// MÁSCARA DE TELEFONE
+// MÁSCARAS DE TELEFONE
 // ========================================
 
-if (telefoneInput) {
-    telefoneInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, '');
-        
-        if (value.length <= 10) {
-            value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-        } else {
-            value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-        }
-        
-        e.target.value = value;
-    });
-}
+const telefoneInput = document.getElementById('telefone');
+
+telefoneInput.addEventListener('input', (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    
+    if (value.length <= 10) {
+        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    } else {
+        value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+    }
+    
+    e.target.value = value;
+});
 
 // ========================================
 // CONTADOR DE CARACTERES NO TEXTAREA
 // ========================================
 
-if (mensagemTextarea) {
-    mensagemTextarea.addEventListener('input', (e) => {
-        const currentLength = e.target.value.length;
-        
-        if (currentLength >= maxChars) {
-            e.target.value = e.target.value.substring(0, maxChars);
-        }
-        
-        let counter = mensagemTextarea.parentElement.querySelector('.char-counter');
-        if (!counter) {
-            counter = document.createElement('div');
-            counter.className = 'char-counter';
-            counter.style.cssText = 'text-align: right; font-size: 0.875rem; color: #6c757d; margin-top: 0.25rem;';
-            mensagemTextarea.parentElement.appendChild(counter);
-        }
-        
-        counter.textContent = `${currentLength}/${maxChars} caracteres`;
-        
-        if (currentLength >= maxChars * 0.9) {
-            counter.style.color = '#ef4444';
-        } else {
-            counter.style.color = '#6c757d';
-        }
-    });
-}
+const mensagemTextarea = document.getElementById('mensagem');
+const maxChars = 1000;
+
+mensagemTextarea.addEventListener('input', (e) => {
+    const currentLength = e.target.value.length;
+    
+    if (currentLength >= maxChars) {
+        e.target.value = e.target.value.substring(0, maxChars);
+    }
+    
+    let counter = mensagemTextarea.parentElement.querySelector('.char-counter');
+    if (!counter) {
+        counter = document.createElement('div');
+        counter.className = 'char-counter';
+        counter.style.cssText = 'text-align: right; font-size: 0.875rem; color: #6c757d; margin-top: 0.25rem;';
+        mensagemTextarea.parentElement.appendChild(counter);
+    }
+    
+    counter.textContent = `${currentLength}/${maxChars} caracteres`;
+    
+    if (currentLength >= maxChars * 0.9) {
+        counter.style.color = '#ef4444';
+    } else {
+        counter.style.color = '#6c757d';
+    }
+});
 
 // ========================================
 // SCROLL TO TOP BUTTON
