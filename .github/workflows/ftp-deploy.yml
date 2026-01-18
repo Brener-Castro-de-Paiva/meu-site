@@ -1,20 +1,26 @@
 name: Deploy via ftp
+
 on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
     
-    - name: FTP Deploy
-      uses: SamKirkland/FTP-Deploy-Action@4.3.0
-      with:
-        server: ${{ secrets.HOST }}
-        username: ${{ secrets.USER }}
-        password: ${{ secrets.PASS }}
-        local-dir: ./docs/
-        server-dir: ./public_html/
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Copy sitemap to docs
+        run: cp sitemap.xml docs/sitemap.xml
+      
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASS }}
+          local-dir: ./docs/
+          server-dir: ./public_html/
