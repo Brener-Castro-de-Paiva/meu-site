@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artigos Jurídicos | Paiva & Rocha Advocacia</title>
+    <meta name="description" content="Artigos e conteúdos jurídicos especializados por área do Direito">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        /* Estilos específicos para a página hub de artigos */
+        .hero-artigos {
+            position: relative;
+            height: 50vh;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #343a40 0%, #006d77 100%);
+            background-image: url('https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=1920');
+            background-size: cover;
+            background-position: center;
+            margin-top: 80px;
+        }
+
+        .hero-artigos .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 109, 119, 0.9), rgba(52, 58, 64, 0.8));
+        }
+
+        .areas-artigos {
+            padding: 5rem 0;
+            background: #f8f9fa;
+        }
+
+        .areas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .area-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .area-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .area-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #006d77, #8a9a5b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .area-card:hover .area-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .area-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .area-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #343a40;
+            margin-bottom: 1rem;
+        }
+
+        .area-card p {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .artigos-count {
+            display: inline-block;
+            background: #006d77;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .em-breve {
+            background: #8a9a5b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="../index.html" class="logo">
+                    <i class="fas fa-balance-scale"></i>
+                    <div class="logo-text">
+                        <h1>Paiva & Rocha</h1>
+                        <span>Advocacia</span>
+                    </div>
+                </a>
+                
+                <nav class="nav" id="nav">
+                    <ul class="nav-list">
+                        <li><a href="../index.html" class="nav-link">Início</a></li>
+                        <li><a href="../index.html#servicos" class="nav-link">Serviços</a></li>
+                        <li><a href="../sobre.html" class="nav-link">Sobre</a></li>
+                        <li><a href="index.html" class="nav-link active">Artigos</a></li>
+                        <li><a href="../index.html#conte-seu-caso" class="nav-link">Conte seu Caso</a></li>
+                        <li><a href="../index.html#contato" class="nav-link">Contato</a></li>
+                    </ul>
+                    <a href="tel:+5524981191013" class="btn-contact">
+                        <i class="fas fa-phone"></i>
+                        (24) 98119-1013
+                    </a>
+                </nav>
+                
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero-artigos">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="container">
+                <div style="text-align: center; color: white;">
+                    <h2 class="hero-title">Artigos Jurídicos</h2>
+                    <p class="hero-subtitle">Conteúdo especializado por área do Direito</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Áreas -->
+    <section class="areas-artigos">
+        <div class="container">
+            <div class="section-header" style="text-align: center;">
+                <h2 class="section-title">Escolha a Área</h2>
+                <p class="section-subtitle">Selecione a área do Direito para ver os artigos especializados</p>
+            </div>
+            
+            <div class="areas-grid">
+                <!-- Direito Civil -->
+                <a href="civil.html" class="area-card">
+                    <div class="area-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Direito Civil</h3>
+                    <p>Artigos sobre contratos, responsabilidade civil, família e sucessões</p>
+                    <span class="artigos-count em-breve">Em breve</span>
+                </a>
+
+                <!-- Direito Previdenciário -->
+                <a href="previdenciario.html" class="area-card">
+                    <div class="area-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3>Direito Previdenciário</h3>
+                    <p>Conteúdo sobre aposentadorias, pensões e benefícios do INSS</p>
+                    <span class="artigos-count em-breve">Em breve</span>
+                </a>
+
+                <!-- Direito Tributário -->
+                <a href="tributario.html" class="area-card">
+                    <div class="area-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <h3>Direito Tributário</h3>
+                    <p>Artigos sobre planejamento tributário e contencioso fiscal</p>
+                    <span class="artigos-count em-breve">Em breve</span>
+                </a>
+
+                <!-- Direito Público -->
+                <a href="publico.html" class="area-card">
+                    <div class="area-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>Direito Público</h3>
+                    <p>Conteúdo sobre contencioso administrativo e defesa do servidor</p>
+                    <span class="artigos-count em-breve">Em breve</span>
+                </a>
+
+                <!-- Direito do Consumidor -->
+                <a href="consumidor.html" class="area-card">
+                    <div class="area-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3>Direito do Consumidor</h3>
+                    <p>Artigos sobre direitos do consumidor e relações de consumo</p>
+                    <span class="artigos-count em-breve">Em breve</span>
+                </a>
+
+                <!-- Direito Trabalhista -->
+                <a href="trabalhista.html" class="area-card">
+                    <div class="area-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3>Direito Trabalhista</h3>
+                    <p>Conteúdo sobre processos trabalhistas e direitos do trabalhador</p>
+                    <span class="artigos-count em-breve">Em breve</span>
+                </a>
+
+                <!-- Direito Digital -->
+                <a href="digital.html" class="area-card">
+                    <div class="area-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3>Direito Digital</h3>
+                    <p>Artigos sobre LGPD, proteção de dados e compliance tecnológico</p>
+                    <span class="artigos-count em-breve">Em breve</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-blog" style="background: linear-gradient(135deg, #006d77, #343a40); padding: 4rem 0; text-align: center;">
+        <div class="container">
+            <div style="max-width: 700px; margin: 0 auto;">
+                <i class="fas fa-gavel" style="font-size: 3.5rem; color: white; margin-bottom: 1.5rem;"></i>
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: white; margin-bottom: 1rem;">Precisa de Orientação Jurídica?</h2>
+                <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9); margin-bottom: 2rem;">Nossa equipe está pronta para analisar seu caso e oferecer a melhor solução</p>
+                <a href="../index.html#conte-seu-caso" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: white; color: #006d77; border-radius: 50px; text-decoration: none; font-weight: 600;">
+                    <i class="fas fa-comment-dots"></i>
+                    Fale com um Advogado
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contato">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <div class="logo">
+                        <i class="fas fa-balance-scale"></i>
+                        <div class="logo-text">
+                            <h3>Paiva & Rocha</h3>
+                            <span>Advocacia</span>
+                        </div>
+                    </div>
+                    <p>Excelência jurídica aliada à inovação tecnológica para defender seus direitos com eficiência.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Links Rápidos</h4>
+                    <ul>
+                        <li><a href="../index.html">Início</a></li>
+                        <li><a href="../index.html#servicos">Serviços</a></li>
+                        <li><a href="../sobre.html">Sobre</a></li>
+                        <li><a href="index.html">Artigos</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Áreas de Atuação</h4>
+                    <ul>
+                        <li><a href="civil.html">Direito Civil</a></li>
+                        <li><a href="previdenciario.html">Direito Previdenciário</a></li>
+                        <li><a href="tributario.html">Direito Tributário</a></li>
+                        <li><a href="publico.html">Direito Público</a></li>
+                        <li><a href="consumidor.html">Direito do Consumidor</a></li>
+                        <li><a href="trabalhista.html">Direito Trabalhista</a></li>
+                        <li><a href="digital.html">Direito Digital</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contato</h4>
+                    <ul class="contact-info">
+                        <li>
+                            <i class="fas fa-user"></i>
+                            <span>Dr. Brener Castro</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:+5524981191013">(24) 98119-1013</a>
+                        </li>
+                        <li style="margin-top: 1rem;">
+                            <i class="fas fa-user"></i>
+                            <span>Dr. Paulo Roberto Rocha</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:+5524999891676">(24) 99989-1676</a>
+                        </li>
+                        <li style="margin-top: 1rem;">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Volta Redonda, RJ</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Paiva & Rocha Advocacia. Todos os direitos reservados.</p>
+                <p>OAB/RJ - Inscrito na Ordem dos Advogados do Brasil</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="../script.js"></script>
+</body>
+</html>
