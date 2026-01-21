@@ -42,9 +42,8 @@ body {
     margin: 0 auto;
     padding: 0 20px;
 }
-
 /* ========================================
-   HEADER
+   HEADER - AJUSTADO PARA INCLUIR ARTIGOS
 ======================================== */
 
 .header {
@@ -67,6 +66,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 0;
+    gap: 1.5rem; /* Reduzido de 2rem para 1.5rem */
 }
 
 .logo {
@@ -100,21 +100,23 @@ body {
 .nav {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1.5rem; /* Reduzido de 2rem para 1.5rem */
 }
 
 .nav-list {
     display: flex;
     list-style: none;
-    gap: 2rem;
+    gap: 1.2rem; /* Reduzido de 2rem para 1.2rem */
 }
 
 .nav-link {
     text-decoration: none;
     color: var(--text-dark);
     font-weight: 500;
+    font-size: 0.95rem; /* Levemente reduzido */
     position: relative;
     transition: var(--transition);
+    white-space: nowrap;
 }
 
 .nav-link::after {
@@ -138,6 +140,170 @@ body {
     width: 100%;
 }
 
+/* ========================================
+   BOTÕES DE CONTATO - OTIMIZADOS
+======================================== */
+
+.contact-buttons {
+    display: flex;
+    gap: 0.75rem; /* Reduzido de 1rem para 0.75rem */
+    align-items: center;
+    margin-left: 1rem; /* Reduzido de 1.5rem para 1rem */
+}
+
+.btn-contact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem; /* Padding mais compacto */
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: var(--white);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    font-size: 0.75rem;
+    min-width: 110px; /* Largura mínima reduzida */
+}
+
+.btn-contact:hover {
+    background: linear-gradient(135deg, #1ebe5d, #0e6b5e);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.btn-contact i {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.btn-contact .contact-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.btn-contact .contact-phone {
+    font-size: 0.7rem;
+    opacity: 0.95;
+    font-weight: 400;
+}
+
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-menu-btn span {
+    width: 25px;
+    height: 3px;
+    background: var(--text-dark);
+    transition: var(--transition);
+}
+
+.mobile-menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* ========================================
+   RESPONSIVE - HEADER
+======================================== */
+
+@media (max-width: 1200px) {
+    .nav-list {
+        gap: 1rem;
+    }
+    
+    .nav-link {
+        font-size: 0.9rem;
+    }
+    
+    .contact-buttons {
+        gap: 0.5rem;
+        margin-left: 0.75rem;
+    }
+    
+    .btn-contact {
+        min-width: 100px;
+        padding: 0.4rem 0.6rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .nav {
+        position: fixed;
+        top: 80px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 80px);
+        background: var(--white);
+        flex-direction: column;
+        padding: 2rem;
+        transition: var(--transition);
+        z-index: 999;
+        overflow-y: auto;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .nav.active {
+        left: 0;
+    }
+    
+    .nav-list {
+        flex-direction: column;
+        width: 100%;
+        gap: 1.5rem;
+    }
+    
+    .nav-link {
+        font-size: 1.1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .contact-buttons {
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0;
+        margin-top: 2rem;
+        gap: 1rem;
+    }
+    
+    .btn-contact {
+        width: 100%;
+        min-width: unset;
+        padding: 1rem;
+        justify-content: center;
+    }
+    
+    .btn-contact i {
+        font-size: 1.5rem;
+    }
+    
+    .btn-contact .contact-name {
+        font-size: 0.9rem;
+    }
+    
+    .btn-contact .contact-phone {
+        font-size: 0.85rem;
+    }
+    
+    .mobile-menu-btn {
+        display: flex;
+    }
+}
 /* ========================================
    CORREÇÃO: BOTÕES DE CONTATO SEPARADOS
 ======================================== */
