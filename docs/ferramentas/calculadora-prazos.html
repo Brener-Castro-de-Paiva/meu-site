@@ -986,7 +986,18 @@
                 return;
             }
             
-            let currentDate = new Date(startDateInput);
+                // EXCLUI O DIA DO COMEÇO (REGRA DO CPC)
+                // A contagem sempre inicia no dia seguinte ao evento
+                let currentDate = new Date(startDateInput);
+                currentDate.setDate(currentDate.getDate() + 1);
+
+                // Se for prazo em dias úteis, garantir início no primeiro dia útil seguinte
+                if (deadlineType === 'work') {
+                    while (!isWorkDay(currentDate)) {
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                }
+
             const countedDays = [];
             const excludedDays = [];
             const suspendedDays = [];
