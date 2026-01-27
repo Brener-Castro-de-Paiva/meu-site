@@ -702,7 +702,7 @@
                             </div>
                             <div class="suspensoes-card">
                                 <div class="detail-value" id="suspendedDaysResult">0</div>
-                                <div class="detail-label">Dias Suspensos Informados</div>
+                                <div class="detail-label">Dias suspensos pelo usuário</div>
                                 <div class="suspensoes-list" id="suspendedDaysList">
                                     <!-- Lista de suspensões será exibida aqui -->
                                 </div>
@@ -981,7 +981,9 @@
             const city = document.getElementById('city').value;
             
             // Processar datas suspensas
-            userSuspendedDates = processSuspendedDates();
+            userSuspendedDates = deadlineType === 'work'
+                ? processSuspendedDates()
+                : [];
             
             if (!startDateInput) {
                 alert('Por favor, selecione uma data inicial.');
@@ -1017,10 +1019,32 @@
             const suspendedDays = [];
             let daysCounted = 0;
             let totalDaysPassed = 0;
+            const suspendedRecorded = new Set();
             
            if (deadlineType === 'work') {
 
     while (daysCounted < days) {
+            const y = currentDate.getFullYear();
+            const m = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const d = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${y}-${m}-${d}`;
+
+            const suspendedDate = userSuspendedDates.find(s => s.dateStr === dateStr);
+
+            if (suspendedDate && !suspendedRecorded.has(dateStr)) {
+                suspendedRecorded.add(dateStr);
+
+                suspendedDays.push({
+                    date: new Date(currentDate),
+                    motivo: suspendedDate.motivo
+                });
+
+                excludedDays.push({
+                    date: new Date(currentDate),
+                    type: 'suspended',
+                    motivo: suspendedDate.motivo
+                });
+            }
 
         if (isWorkDay(currentDate)) {
             daysCounted++;
@@ -1029,30 +1053,14 @@
                 type: 'workday'
             });
         } else {
-            const year = currentDate.getFullYear();
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-            const day = String(currentDate.getDate()).padStart(2, '0');
-            const dateStr = `${year}-${month}-${day}`;
-            const dayOfWeek = currentDate.getDay();
-            let isSuspended = false;
-            let motivo = '';
+                const dayOfWeek = currentDate.getDay();
 
-            const suspendedDate = userSuspendedDates.find(s => s.dateStr === dateStr);
-            if (suspendedDate) {
-                isSuspended = true;
-                motivo = suspendedDate.motivo;
-                suspendedDays.push({
+                excludedDays.push({
                     date: new Date(currentDate),
-                    motivo: motivo
+                    type: (dayOfWeek === 0 || dayOfWeek === 6) ? 'weekend' : 'holiday',
+                    motivo: ''
                 });
             }
-
-            excludedDays.push({
-                date: new Date(currentDate),
-                type: isSuspended ? 'suspended' : (dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'holiday'),
-                motivo: motivo
-            });
-        }
 
         totalDaysPassed++;
         currentDate.setDate(currentDate.getDate() + 1);
@@ -1113,9 +1121,9 @@
             
             // Atualizar observação
             const observation = document.getElementById('processObservation');
-            const suspensoesText = suspendedDays.length > 0 ? 
-                `incluindo ${suspendedDays.length} dia(s) de suspensão informado(s) pelo usuário.` : 
-                'Este cálculo considera feriados nacionais e estaduais.';
+            const suspensoesText = (deadlineType === 'work' && suspendedDays.length > 0)
+                ? `incluindo ${suspendedDays.length} dia(s) de suspensão informado(s) pelo usuário.`
+                : 'Este cálculo considera feriados nacionais e estaduais.';
             
             if (processType === 'electronic') {
                 observation.textContent = `Para processo eletrônico, o prazo termina às 24h do último dia. ${suspensoesText}`;
@@ -1144,16 +1152,31 @@
             const suspendedContainer = document.getElementById('suspendedDaysList');
             suspendedContainer.innerHTML = '';
             
-            if (suspendedDaysList.length > 0) {
+            if (currentCalculation.userSuspendedDates.length > 0) {
                 const ul = document.createElement('ul');
-                suspendedDaysList.forEach(item => {
+
+                currentCalculation.userSuspendedDates.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<span class="data-suspensao">${item.date.toLocaleDateString('pt-BR')}</span> - ${item.motivo}`;
+
+                    const impactou = suspendedDaysList.some(
+                        s => s.date.toDateString() === item.date.toDateString()
+                    );
+
+                    li.innerHTML = `
+                        <span class="data-suspensao">
+                            ${item.date.toLocaleDateString('pt-BR')}
+                        </span>
+                        - ${item.motivo}
+                        ${impactou ? '' : ' <em style="color:#6c757d;">(impactou o prazo)</em>'}
+                    `;
+
                     ul.appendChild(li);
                 });
+
                 suspendedContainer.appendChild(ul);
             } else {
-                suspendedContainer.innerHTML = '<p style="color: #6c757d; font-style: italic;">Nenhuma suspensão informada pelo usuário.</p>';
+                suspendedContainer.innerHTML =
+                    '<p style="color: #6c757d; font-style: italic;">Nenhuma suspensão informada pelo usuário.</p>';
             }
             
             // Listar dias contados
