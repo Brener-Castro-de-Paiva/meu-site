@@ -1099,22 +1099,26 @@
                 }
             
             // Armazenar dados do cálculo para o PDF
-            currentCalculation = {
-                startDate: startDateInput,
-                days: days,
-                state: state,
-                city: city,
-                processType: processType,
-                deadlineType: deadlineType,
-                finalDate: currentDate,
-                countedDays: countedDays,
-                excludedDays: excludedDays,
-                suspendedDays: suspendedDays,
-                userSuspendedDates: userSuspendedDates,
-                countedDaysCount: countedDays.length,
-                excludedDaysCount: excludedDays.length,
-                suspendedDaysCount: suspendedDays.length
-            };
+                currentCalculation = {
+                    startDate: new Date(
+                        dateParts[0],
+                        dateParts[1] - 1,
+                        dateParts[2]
+                    ),
+                    days: days,
+                    state: state,
+                    city: city,
+                    processType: processType,
+                    deadlineType: deadlineType,
+                    finalDate: currentDate,
+                    countedDays: countedDays,
+                    excludedDays: excludedDays,
+                    suspendedDays: suspendedDays,
+                    userSuspendedDates: userSuspendedDates,
+                    countedDaysCount: countedDays.length,
+                    excludedDaysCount: excludedDays.length,
+                    suspendedDaysCount: suspendedDays.length
+                };
             
             // Ativar botão de PDF
             document.getElementById('btnPDF').disabled = false;
