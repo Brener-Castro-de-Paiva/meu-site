@@ -1044,40 +1044,33 @@
                         });
                     }
                 }
-                           } else {
+                           } else {                            
+            
                     // ============================
                     // DIAS CORRIDOS (CPC art. 224)
                     // ============================
-                    // Regra: Exclui o dia do começo e inclui o dia do vencimento
-                    // Exemplo: Prazo de 5 dias a partir de 01/01
-                    // Não conta: 01/01 (dia do começo)
-                    // Conta: 02/01, 03/01, 04/01, 05/01, 06/01
-                    // Vencimento: 06/01
 
                     let tempDate = new Date(startDateInput);
 
-                    // Exclui o dia do começo: a contagem inicia no dia seguinte
+                    // Exclui o dia do começo
                     tempDate.setDate(tempDate.getDate() + 1);
 
-                    // Contar os dias corridos
                     for (let i = 0; i < days; i++) {
                         countedDays.push({
                             date: new Date(tempDate),
                             type: 'calendar'
                         });
 
-                        // Se não for o último dia, avança
-                        if (i < days - 1) {
-                            tempDate.setDate(tempDate.getDate() + 1);
-                        }
+                        // avança sempre
+                        tempDate.setDate(tempDate.getDate() + 1);
                     }
 
-                    // O vencimento é o último dia contado
+                    // vencimento = último dia contado
+                    tempDate.setDate(tempDate.getDate() - 1);
                     currentDate = new Date(tempDate);
 
                     totalDaysPassed = days;
                 }
-
             
             // Armazenar dados do cálculo para o PDF
             currentCalculation = {
