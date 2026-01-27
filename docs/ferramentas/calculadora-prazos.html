@@ -662,7 +662,7 @@
                             <ul>
                                 <li>Uma data por linha</li>
                                 <li>Formato: DD/MM/AAAA - Motivo</li>
-                                <li>Exemplo: 25/12/20262026 - Natal</li>
+                                <li>Exemplo: 25/12/2026 - Natal</li>
                                 <li>As datas informadas serão adicionadas aos feriados e não serão contadas</li>
                             </ul>
                         </div>
@@ -836,21 +836,21 @@
     <script src="../script.js"></script>
     
     <!-- JavaScript da Calculadora -->
-    <script>2026
+    <script>
         // Feriados Nacionais 2026
         const nationalHolidays = [
-            '2026-01-01', // Confraternização Universal
-            '2026-02-12', // Carnaval
-            '2026-02-13', // Carnaval
-            '2026-03-29', // Sexta-feira Santa
-            '2026-04-21', // Tiradentes
-            '2026-05-01', // Dia do Trabalho
-            '2026-05-30', // Corpus Christi
-            '2026-09-07', // Independência do Brasil
-            '2026-10-12', // Nossa Senhora Aparecida
-            '2026-11-02', // Finados
-            '2026-11-15', // Proclamação da República
-            '2026-12-25'  // Natal
+            '2026-01-01',
+            '2026-02-16',
+            '2026-02-17',
+            '2026-04-03',
+            '2026-04-21',
+            '2026-05-01',
+            '2026-06-04',
+            '2026-09-07',
+            '2026-10-12',
+            '2026-11-02',
+            '2026-11-15',
+            '2026-12-25'
         ];
 
         // Feriados Estaduais (exemplos)
@@ -986,17 +986,21 @@
                 return;
             }
             
-                // EXCLUI O DIA DO COMEÇO (REGRA DO CPC)
-                // A contagem sempre inicia no dia seguinte ao evento
+               // REGRA DO CPC (art. 224):
+                // Exclui o dia do começo e inicia a contagem no dia seguinte
                 let currentDate = new Date(startDateInput);
+
+                // A contagem sempre começa no dia seguinte ao evento
                 currentDate.setDate(currentDate.getDate() + 1);
 
-                // Se for prazo em dias úteis, garantir início no primeiro dia útil seguinte
+                // Para prazos em dias úteis (art. 219 do CPC),
+                // a contagem deve iniciar no primeiro dia útil subsequente
                 if (deadlineType === 'work') {
                     while (!isWorkDay(currentDate)) {
                         currentDate.setDate(currentDate.getDate() + 1);
                     }
                 }
+
 
             const countedDays = [];
             const excludedDays = [];
@@ -1040,49 +1044,40 @@
                         });
                     }
                 }
-            } else {
-                // Dias corridos: contar todos os dias, mas ajustar se o último dia não for útil
-                currentDate.setDate(currentDate.getDate() + days);
-                totalDaysPassed = days;
-                
-                // Para dias corridos, todos os dias são contados
-                let tempDate = new Date(startDateInput);
-                for (let i = 1; i <= days; i++) {
+                           } else {
+                    // ============================
+                    // DIAS CORRIDOS (CPC art. 224)
+                    // ============================
+                    // Regra: Exclui o dia do começo e inclui o dia do vencimento
+                    // Exemplo: Prazo de 5 dias a partir de 01/01
+                    // Não conta: 01/01 (dia do começo)
+                    // Conta: 02/01, 03/01, 04/01, 05/01, 06/01
+                    // Vencimento: 06/01
+
+                    let tempDate = new Date(startDateInput);
+
+                    // Exclui o dia do começo: a contagem inicia no dia seguinte
                     tempDate.setDate(tempDate.getDate() + 1);
-                    countedDays.push({
-                        date: new Date(tempDate),
-                        type: 'workday'
-                    });
-                }
-                
-                // Verificar se o último dia é útil, se não for, avança até o próximo dia útil
-                while (!isWorkDay(currentDate)) {
-                    currentDate.setDate(currentDate.getDate() + 1);
-                    totalDaysPassed++;
-                    
-                    const dateStr = currentDate.toISOString().split('T')[0];
-                    const dayOfWeek = currentDate.getDay();
-                    let isSuspended = false;
-                    let motivo = '';
-                    
-                    // Verificar se é suspensão do usuário
-                    const suspendedDate = userSuspendedDates.find(s => s.dateStr === dateStr);
-                    if (suspendedDate) {
-                        isSuspended = true;
-                        motivo = suspendedDate.motivo;
-                        suspendedDays.push({
-                            date: new Date(currentDate),
-                            motivo: motivo
+
+                    // Contar os dias corridos
+                    for (let i = 0; i < days; i++) {
+                        countedDays.push({
+                            date: new Date(tempDate),
+                            type: 'calendar'
                         });
+
+                        // Se não for o último dia, avança
+                        if (i < days - 1) {
+                            tempDate.setDate(tempDate.getDate() + 1);
+                        }
                     }
-                    
-                    excludedDays.push({
-                        date: new Date(currentDate),
-                        type: isSuspended ? 'suspended' : (dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'holiday'),
-                        motivo: motivo
-                    });
+
+                    // O vencimento é o último dia contado
+                    currentDate = new Date(tempDate);
+
+                    totalDaysPassed = days;
                 }
-            }
+
             
             // Armazenar dados do cálculo para o PDF
             currentCalculation = {
