@@ -1534,18 +1534,17 @@
 
         doc.setFontSize(20);
         doc.setTextColor(138, 154, 91);
+
+        // TROQUE suspendedDaysCount POR userSuspendedDates.length
         doc.text(
-            currentCalculation.suspendedDaysCount.toString(),
+            currentCalculation.userSuspendedDates.length.toString(), // ← AQUI
             margin + (boxWidth + 10) * 3 + boxWidth / 2,
             yPos + 10,
             { align: 'center' }
         );
-
         doc.setFontSize(9);
         doc.setTextColor(108, 117, 125);
         doc.text("Dias Suspensos", margin + (boxWidth + 10) * 3 + boxWidth / 2, yPos + 17, { align: 'center' });
-
-        yPos += 30;
 
         // ============================
         // LISTAS EM GRID (5x6)
@@ -1577,8 +1576,18 @@
         if (currentCalculation.userSuspendedDates.length > 0) {
             renderGridList({
                 title: "DIAS SUSPENSOS (INFORMADOS PELO USUÁRIO):",
-                items: currentCalculation.userSuspendedDates,
-                getText: d => `${d.date.toLocaleDateString('pt-BR')} - ${d.motivo.substring(0, 15)}`,
+                items: currentCalculation.userSuspendedDates.map(item => {
+                    // Verificar se impactou o prazo
+                    const impactou = currentCalculation.suspendedDays.some(
+                        s => s.date.toDateString() === item.date.toDateString()
+                    );
+                    
+                    return {
+                        ...item,
+                        impacto: impactou ? '(impactou)' : '(não impactou)'
+                    };
+                }),
+                getText: d => `${d.date.toLocaleDateString('pt-BR')} - ${d.motivo.substring(0, 20)} ${d.impacto}`,
                 titleColor: [138, 154, 91]
             });
         }
