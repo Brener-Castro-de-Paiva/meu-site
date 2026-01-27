@@ -1170,7 +1170,7 @@
         document.getElementById('totalDaysResult').textContent = totalDays;
         document.getElementById('countedDaysResult').textContent = countedDays;
         document.getElementById('excludedDaysResult').textContent = excludedDays;
-        document.getElementById('suspendedDaysResult').textContent = suspendedDays;
+        document.getElementById('suspendedDaysResult').textContent = currentCalculation.userSuspendedDates.length;
         
         // Listar suspensões informadas
         const suspendedContainer = document.getElementById('suspendedDaysList');
