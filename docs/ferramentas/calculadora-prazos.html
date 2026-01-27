@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,7 +12,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- CSS Principal -->
     <link rel="stylesheet" href="../style.css">
@@ -995,24 +994,23 @@
                 return;
             }
             
-                // REGRA DO CPC (art. 224):
-                // Exclui o dia do começo e inicia a contagem no dia seguinte
-                
-                // Tratamento de data para evitar problemas de fuso horário (cria data local 00:00)
-                const dateParts = startDateInput.split('-');
-                let currentDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+            // REGRA DO CPC (art. 224):
+            // Exclui o dia do começo e inicia a contagem no dia seguinte
+            
+            // Tratamento de data para evitar problemas de fuso horário (cria data local 00:00)
+            const dateParts = startDateInput.split('-');
+            let currentDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
 
-                // A contagem sempre começa no dia seguinte ao evento (Exclui o dia do começo)
-                currentDate.setDate(currentDate.getDate() + 1);
+            // A contagem sempre começa no dia seguinte ao evento (Exclui o dia do começo)
+            currentDate.setDate(currentDate.getDate() + 1);
 
-                // Para prazos em dias úteis (art. 219 do CPC),
-                // a contagem deve iniciar no primeiro dia útil subsequente
-                if (deadlineType === 'work') {
-                    while (!isWorkDay(currentDate)) {
-                        currentDate.setDate(currentDate.getDate() + 1);
-                    }
+            // Para prazos em dias úteis (art. 219 do CPC),
+            // a contagem deve iniciar no primeiro dia útil subsequente
+            if (deadlineType === 'work') {
+                while (!isWorkDay(currentDate)) {
+                    currentDate.setDate(currentDate.getDate() + 1);
                 }
-
+            }
 
             const countedDays = [];
             const excludedDays = [];
@@ -1021,104 +1019,102 @@
             let totalDaysPassed = 0;
             const suspendedRecorded = new Set();
             
-           if (deadlineType === 'work') {
+            if (deadlineType === 'work') {
+                while (daysCounted < days) {
+                    const y = currentDate.getFullYear();
+                    const m = String(currentDate.getMonth() + 1).padStart(2, '0');
+                    const d = String(currentDate.getDate()).padStart(2, '0');
+                    const dateStr = `${y}-${m}-${d}`;
 
-    while (daysCounted < days) {
-            const y = currentDate.getFullYear();
-            const m = String(currentDate.getMonth() + 1).padStart(2, '0');
-            const d = String(currentDate.getDate()).padStart(2, '0');
-            const dateStr = `${y}-${m}-${d}`;
+                    const suspendedDate = userSuspendedDates.find(s => s.dateStr === dateStr);
 
-            const suspendedDate = userSuspendedDates.find(s => s.dateStr === dateStr);
+                    if (suspendedDate && !suspendedRecorded.has(dateStr)) {
+                        suspendedRecorded.add(dateStr);
 
-            if (suspendedDate && !suspendedRecorded.has(dateStr)) {
-                suspendedRecorded.add(dateStr);
-
-                suspendedDays.push({
-                    date: new Date(currentDate),
-                    motivo: suspendedDate.motivo
-                });
-
-                excludedDays.push({
-                    date: new Date(currentDate),
-                    type: 'suspended',
-                    motivo: suspendedDate.motivo
-                });
-            }
-
-        if (isWorkDay(currentDate)) {
-            daysCounted++;
-            countedDays.push({
-                date: new Date(currentDate),
-                type: 'workday'
-            });
-        } else {
-                const dayOfWeek = currentDate.getDay();
-
-                excludedDays.push({
-                    date: new Date(currentDate),
-                    type: (dayOfWeek === 0 || dayOfWeek === 6) ? 'weekend' : 'holiday',
-                    motivo: ''
-                });
-            }
-
-        totalDaysPassed++;
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    // vencimento = último dia útil contado
-    currentDate.setDate(currentDate.getDate() - 1);
-                           } else {                            
-            
-                    // ============================
-                    // DIAS CORRIDOS (CPC art. 224)
-                    // ============================
-
-                    // Tratamento de data para evitar problemas de fuso horário
-                    const tempDateParts = startDateInput.split('-');
-                    let tempDate = new Date(tempDateParts[0], tempDateParts[1] - 1, tempDateParts[2]);
-
-                    // Exclui o dia do começo (A contagem inicia no dia seguinte)
-                    tempDate.setDate(tempDate.getDate() + 1);
-
-                    for (let i = 0; i < days; i++) {
-                        countedDays.push({
-                            date: new Date(tempDate),
-                            type: 'calendar'
+                        suspendedDays.push({
+                            date: new Date(currentDate),
+                            motivo: suspendedDate.motivo
                         });
 
-                        // avança sempre
-                        tempDate.setDate(tempDate.getDate() + 1);
+                        excludedDays.push({
+                            date: new Date(currentDate),
+                            type: 'suspended',
+                            motivo: suspendedDate.motivo
+                        });
                     }
 
-                    // vencimento = último dia contado
-                    tempDate.setDate(tempDate.getDate() - 1);
-                    currentDate = new Date(tempDate);
+                    if (isWorkDay(currentDate)) {
+                        daysCounted++;
+                        countedDays.push({
+                            date: new Date(currentDate),
+                            type: 'workday'
+                        });
+                    } else {
+                        const dayOfWeek = currentDate.getDay();
 
-                    totalDaysPassed = days;
+                        excludedDays.push({
+                            date: new Date(currentDate),
+                            type: (dayOfWeek === 0 || dayOfWeek === 6) ? 'weekend' : 'holiday',
+                            motivo: ''
+                        });
+                    }
+
+                    totalDaysPassed++;
+                    currentDate.setDate(currentDate.getDate() + 1);
                 }
-            
-            // Armazenar dados do cálculo para o PDF
-                currentCalculation = {
-                    startDate: new Date(
-                        dateParts[0],
-                        dateParts[1] - 1,
-                        dateParts[2]
-                    ),
-                    days: days,
-                    state: state,
-                    city: city,
-                    processType: processType,
-                    deadlineType: deadlineType,
-                    finalDate: currentDate,
-                    countedDays: countedDays,
-                    excludedDays: excludedDays,
-                    suspendedDays: suspendedDays,
-                    userSuspendedDates: userSuspendedDates,
-                    countedDaysCount: countedDays.length,
-                    excludedDaysCount: excludedDays.length,
-                    suspendedDaysCount: suspendedDays.length
-                };
+
+                // vencimento = último dia útil contado
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                // ============================
+                // DIAS CORRIDOS (CPC art. 224)
+                // ============================
+
+                // Tratamento de data para evitar problemas de fuso horário
+                const tempDateParts = startDateInput.split('-');
+                let tempDate = new Date(tempDateParts[0], tempDateParts[1] - 1, tempDateParts[2]);
+
+                // Exclui o dia do começo (A contagem inicia no dia seguinte)
+                tempDate.setDate(tempDate.getDate() + 1);
+
+                for (let i = 0; i < days; i++) {
+                    countedDays.push({
+                        date: new Date(tempDate),
+                        type: 'calendar'
+                    });
+
+                    // avança sempre
+                    tempDate.setDate(tempDate.getDate() + 1);
+                }
+
+                // vencimento = último dia contado
+                tempDate.setDate(tempDate.getDate() - 1);
+                currentDate = new Date(tempDate);
+
+                totalDaysPassed = days;
+            }
+                  
+            // Armazenar dados do cálculo
+            currentCalculation = {
+                startDate: new Date(
+                    dateParts[0],
+                    dateParts[1] - 1,
+                    dateParts[2]
+                ),
+                days: days,
+                state: state,
+                city: city,
+                processType: processType,
+                deadlineType: deadlineType,
+                finalDate: currentDate,
+                countedDays: countedDays,
+                excludedDays: excludedDays,
+                suspendedDays: suspendedDays,
+                userSuspendedDates: userSuspendedDates,
+                countedDaysCount: countedDays.length,
+                excludedDaysCount: excludedDays.length,
+                suspendedDaysCount: suspendedDays.length
+            };
             
             // Ativar botão de PDF
             document.getElementById('btnPDF').disabled = false;
@@ -1248,288 +1244,380 @@
             document.getElementById('resultados').style.display = 'block';
         }
 
-        // Gerar PDF (atualizado para incluir suspensões)
+        // Gerar PDF Otimizado com Grid 5x6
         function gerarPDF() {
             if (!currentCalculation) {
                 alert('Por favor, calcule um prazo primeiro antes de gerar o PDF.');
                 return;
             }
-            
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
-            
-            // Configurações
+
             const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
             const margin = 20;
             let yPos = margin;
-            
-            // Logo textual do escritório
+
+            // ============================
+            // CONTROLE DE QUEBRA DE PÁGINA
+            // ============================
+            function checkPageBreak(extra = 20) {
+                if (yPos + extra > pageHeight - margin) {
+                    doc.addPage();
+                    yPos = margin;
+                }
+            }
+
+            // ============================
+            // FUNÇÃO DE GRID (5 COLUNAS x 6 LINHAS)
+            // ============================
+            function renderGridList({ title, items, getText, titleColor = [0, 0, 0] }) {
+                if (!items || items.length === 0) return;
+
+                checkPageBreak(50);
+
+                // Título da seção
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...titleColor);
+                doc.text(title, margin, yPos);
+                yPos += 8;
+
+                doc.setFontSize(8); // Fonte menor para caber mais
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(0, 0, 0);
+
+                const maxCols = 5;
+                const maxRows = 6;
+                const maxItems = maxCols * maxRows; // 30 itens por grid
+                const colGap = 3; // Gap reduzido entre colunas
+
+                const usableWidth = pageWidth - 2 * margin;
+                const colWidth = (usableWidth - (maxCols - 1) * colGap) / maxCols;
+
+                const startY = yPos;
+
+                // Renderizar grid (preenche por COLUNA, depois por linha)
+                items.slice(0, maxItems).forEach((item, index) => {
+                    const col = Math.floor(index / maxRows);
+                    const row = index % maxRows;
+
+                    const x = margin + col * (colWidth + colGap);
+                    const y = startY + row * 4.5; // Espaçamento vertical menor
+
+                    const text = getText(item);
+                    // Truncar texto longo para caber na coluna
+                    const truncated = doc.splitTextToSize(`• ${text}`, colWidth - 2);
+                    doc.text(truncated[0], x, y);
+                });
+
+                yPos = startY + maxRows * 4.5 + 5;
+
+                // Indicar se há mais itens
+                if (items.length > maxItems) {
+                    doc.setFontSize(9);
+                    doc.setTextColor(120, 120, 120);
+                    doc.text(`... e mais ${items.length - maxItems} dia(s)`, margin, yPos);
+                    yPos += 6;
+                }
+            }
+
+            // ============================
+            // CABEÇALHO
+            // ============================
             doc.setFontSize(20);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 109, 119);
             doc.text("PAIVA & ROCHA", pageWidth / 2, yPos, { align: 'center' });
-            
-            yPos += 8;
+
+            yPos += 6;
             doc.setFontSize(12);
             doc.setTextColor(52, 58, 64);
             doc.text("ADVOCACIA", pageWidth / 2, yPos, { align: 'center' });
-            
-            yPos += 15;
-            
-            // Linha divisória
+
+            yPos += 10;
             doc.setDrawColor(0, 109, 119);
             doc.setLineWidth(0.5);
             doc.line(margin, yPos, pageWidth - margin, yPos);
-            
-            yPos += 15;
-            
+
+            yPos += 8;
+
             // Título do documento
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 0, 0);
             doc.text("CÁLCULO DE PRAZO PROCESSUAL", pageWidth / 2, yPos, { align: 'center' });
-            
+
             yPos += 10;
             doc.setFontSize(11);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(100, 100, 100);
-            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, pageWidth / 2, yPos, { align: 'center' });
-            
-            yPos += 20;
-            
-            // Informações do cálculo
+            doc.text(
+                `Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`,
+                pageWidth / 2,
+                yPos,
+                { align: 'center' }
+            );
+
+            yPos += 12;
+
+            // ============================
+            // PARÂMETROS DO CÁLCULO
+            // ============================
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 0, 0);
             doc.text("PARÂMETROS DO CÁLCULO", margin, yPos);
-            
+
             yPos += 10;
             doc.setFontSize(11);
             doc.setFont('helvetica', 'normal');
-            
+
             // Data Inicial
             doc.setTextColor(0, 109, 119);
             doc.text("Data Inicial:", margin, yPos);
             doc.setTextColor(0, 0, 0);
-            doc.text(new Date(currentCalculation.startDate).toLocaleDateString('pt-BR'), margin + 40, yPos);
-            
+            doc.text(currentCalculation.startDate.toLocaleDateString('pt-BR'), margin + 40, yPos);
+
             yPos += 7;
-            
+
             // Prazo
             doc.setTextColor(0, 109, 119);
             doc.text("Prazo:", margin, yPos);
             doc.setTextColor(0, 0, 0);
-            doc.text(`${currentCalculation.days} dias ${currentCalculation.deadlineType === 'work' ? 'úteis' : 'corridos'}`, margin + 40, yPos);
-            
+            doc.text(
+                `${currentCalculation.days} dias ${currentCalculation.deadlineType === 'work' ? 'úteis' : 'corridos'}`,
+                margin + 40,
+                yPos
+            );
+
             yPos += 7;
-            
+
             // Localidade
-            const stateName = document.querySelector(`#state option[value="${currentCalculation.state}"]`).text;
+            const stateName = document.querySelector(`#state option[value="${currentCalculation.state}"]`)?.text || currentCalculation.state;
             doc.setTextColor(0, 109, 119);
             doc.text("Localidade:", margin, yPos);
             doc.setTextColor(0, 0, 0);
             const localidade = `${stateName}${currentCalculation.city ? ` - ${currentCalculation.city}` : ''}`;
             doc.text(localidade, margin + 40, yPos);
-            
+
             yPos += 7;
-            
+
             // Tipo de Processo
             doc.setTextColor(0, 109, 119);
             doc.text("Tipo de Processo:", margin, yPos);
             doc.setTextColor(0, 0, 0);
-            doc.text(currentCalculation.processType === 'electronic' ? 'Processo Eletrônico' : 'Processo Físico', margin + 55, yPos);
-            
+            doc.text(
+                currentCalculation.processType === 'electronic' ? 'Processo Eletrônico' : 'Processo Físico',
+                margin + 55,
+                yPos
+            );
+
             yPos += 7;
-            
+
             // Suspensões informadas
             if (currentCalculation.userSuspendedDates.length > 0) {
                 doc.setTextColor(0, 109, 119);
                 doc.text("Suspensões:", margin, yPos);
                 doc.setTextColor(0, 0, 0);
                 doc.text(`${currentCalculation.userSuspendedDates.length} dia(s) informado(s)`, margin + 40, yPos);
+                yPos += 7;
             }
-            
-            yPos += 15;
-            
-            // Resultados
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text("RESULTADOS DO CÁLCULO", margin, yPos);
-            
-            yPos += 10;
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'normal');
-            
-            // Prazo Final em destaque
+
+            yPos += 8;
+
+            // ============================
+            // RESULTADO FINAL
+            // ============================
+            checkPageBreak(30);
+
             doc.setFillColor(0, 109, 119);
             doc.rect(margin, yPos, pageWidth - 2 * margin, 15, 'F');
-            
+
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(255, 255, 255);
             doc.text("PRAZO FINAL:", margin + 10, yPos + 10);
-            
+
             doc.setFontSize(18);
             doc.text(currentCalculation.finalDate.toLocaleDateString('pt-BR'), pageWidth - margin - 60, yPos + 10);
-            
+
             yPos += 25;
-            
-            // Estatísticas (4 boxes)
+
+            // ============================
+            // ESTATÍSTICAS (4 BOXES)
+            // ============================
+            checkPageBreak(30);
+
             const boxWidth = (pageWidth - 2 * margin - 30) / 4;
-            
-            // Dias Solicitados
+
+            // Box 1: Dias Solicitados
             doc.setFillColor(248, 249, 250);
             doc.rect(margin, yPos, boxWidth, 20, 'F');
             doc.setDrawColor(206, 212, 218);
             doc.rect(margin, yPos, boxWidth, 20, 'S');
-            
+
             doc.setFontSize(20);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 109, 119);
             doc.text(currentCalculation.days.toString(), margin + boxWidth / 2, yPos + 10, { align: 'center' });
-            
+
             doc.setFontSize(9);
             doc.setTextColor(108, 117, 125);
             doc.text("Dias Solicitados", margin + boxWidth / 2, yPos + 17, { align: 'center' });
-            
-            // Dias Contados
+
+            // Box 2: Dias Contados
             doc.setFillColor(248, 249, 250);
             doc.rect(margin + boxWidth + 10, yPos, boxWidth, 20, 'F');
-            doc.setDrawColor(206, 212, 218);
             doc.rect(margin + boxWidth + 10, yPos, boxWidth, 20, 'S');
-            
+
             doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 109, 119);
-            doc.text(currentCalculation.countedDaysCount.toString(), margin + boxWidth + 10 + boxWidth / 2, yPos + 10, { align: 'center' });
-            
+            doc.text(
+                currentCalculation.countedDaysCount.toString(),
+                margin + boxWidth + 10 + boxWidth / 2,
+                yPos + 10,
+                { align: 'center' }
+            );
+
             doc.setFontSize(9);
             doc.setTextColor(108, 117, 125);
             doc.text("Dias Contados", margin + boxWidth + 10 + boxWidth / 2, yPos + 17, { align: 'center' });
-            
-            // Dias Não Contados
+
+            // Box 3: Dias Não Contados
             doc.setFillColor(248, 249, 250);
             doc.rect(margin + (boxWidth + 10) * 2, yPos, boxWidth, 20, 'F');
-            doc.setDrawColor(206, 212, 218);
             doc.rect(margin + (boxWidth + 10) * 2, yPos, boxWidth, 20, 'S');
-            
+
             doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 109, 119);
-            doc.text(currentCalculation.excludedDaysCount.toString(), margin + (boxWidth + 10) * 2 + boxWidth / 2, yPos + 10, { align: 'center' });
-            
+            doc.text(
+                currentCalculation.excludedDaysCount.toString(),
+                margin + (boxWidth + 10) * 2 + boxWidth / 2,
+                yPos + 10,
+                { align: 'center' }
+            );
+
             doc.setFontSize(9);
             doc.setTextColor(108, 117, 125);
             doc.text("Dias Não Contados", margin + (boxWidth + 10) * 2 + boxWidth / 2, yPos + 17, { align: 'center' });
-            
-            // Dias Suspensos
+
+            // Box 4: Dias Suspensos
             doc.setFillColor(248, 249, 250);
             doc.rect(margin + (boxWidth + 10) * 3, yPos, boxWidth, 20, 'F');
-            doc.setDrawColor(206, 212, 218);
             doc.rect(margin + (boxWidth + 10) * 3, yPos, boxWidth, 20, 'S');
-            
+
             doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(138, 154, 91); // Cor #8a9a5b
-            doc.text(currentCalculation.suspendedDaysCount.toString(), margin + (boxWidth + 10) * 3 + boxWidth / 2, yPos + 10, { align: 'center' });
-            
+            doc.setTextColor(138, 154, 91);
+            doc.text(
+                currentCalculation.suspendedDaysCount.toString(),
+                margin + (boxWidth + 10) * 3 + boxWidth / 2,
+                yPos + 10,
+                { align: 'center' }
+            );
+
             doc.setFontSize(9);
             doc.setTextColor(108, 117, 125);
             doc.text("Dias Suspensos", margin + (boxWidth + 10) * 3 + boxWidth / 2, yPos + 17, { align: 'center' });
-            
+
             yPos += 30;
-            
-            // Lista de suspensões informadas
+
+            // ============================
+            // LISTAS EM GRID (5x6)
+            // ============================
+
+            // Dias Contados
+            renderGridList({
+                title: "DIAS CONTADOS PARA O PRAZO:",
+                items: currentCalculation.countedDays,
+                getText: d => d.date.toLocaleDateString('pt-BR'),
+                titleColor: [0, 109, 119]
+            });
+
+            // Dias Não Contados
+            renderGridList({
+                title: "DIAS NÃO CONTADOS:",
+                items: currentCalculation.excludedDays,
+                getText: d => {
+                    const data = d.date.toLocaleDateString('pt-BR');
+                    if (d.type === 'weekend') return `${data} (FDS)`;
+                    if (d.type === 'holiday') return `${data} (Feriado)`;
+                    if (d.type === 'suspended') return `${data} (Susp.)`;
+                    return data;
+                },
+                titleColor: [198, 40, 40]
+            });
+
+            // Dias Suspensos (se houver)
             if (currentCalculation.userSuspendedDates.length > 0) {
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(138, 154, 91); // Cor #8a9a5b
-                doc.text("SUSPENSÕES INFORMADAS PELO USUÁRIO:", margin, yPos);
-                
-                yPos += 8;
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(0, 0, 0);
-                
-                currentCalculation.userSuspendedDates.forEach((susp, index) => {
-                    if (index < 5) { // Limitar a 5 suspensões no PDF
-                        doc.text(`• ${susp.date.toLocaleDateString('pt-BR')} - ${susp.motivo}`, margin, yPos);
-                        yPos += 6;
-                    }
+                renderGridList({
+                    title: "DIAS SUSPENSOS (INFORMADOS PELO USUÁRIO):",
+                    items: currentCalculation.userSuspendedDates,
+                    getText: d => `${d.date.toLocaleDateString('pt-BR')} - ${d.motivo.substring(0, 15)}`,
+                    titleColor: [138, 154, 91]
                 });
-                
-                if (currentCalculation.userSuspendedDates.length > 5) {
-                    doc.text(`... e mais ${currentCalculation.userSuspendedDates.length - 5} suspensão(ões)`, margin, yPos);
-                    yPos += 6;
-                }
-                
-                yPos += 5;
             }
-            
-            // Observações
+
+            // ============================
+            // OBSERVAÇÕES
+            // ============================
+            checkPageBreak(30);
+
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 0, 0);
             doc.text("OBSERVAÇÕES:", margin, yPos);
-            
+
             yPos += 8;
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            
-            const observacaoText = currentCalculation.processType === 'electronic' 
+
+            const observacaoText = currentCalculation.processType === 'electronic'
                 ? 'Para processo eletrônico, o prazo termina às 24h do último dia.'
                 : 'Para processo físico, o prazo termina no final do horário do fórum (normalmente 18h).';
-            
+
             const lines = doc.splitTextToSize(observacaoText, pageWidth - 2 * margin);
             doc.text(lines, margin, yPos);
-            
+
             yPos += lines.length * 6 + 5;
-            
-            // Feriados considerados
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'italic');
-            doc.setTextColor(100, 100, 100);
-            
-            const suspensoesInfo = currentCalculation.suspendedDaysCount > 0 
-                ? `, estaduais e ${currentCalculation.suspendedDaysCount} suspensão(ões) informada(s).`
-                : ' e estaduais conforme base 2026.';
-                
-            doc.text(`Cálculo considera feriados nacionais${suspensoesInfo}`, margin, yPos);
-            
-            yPos += 10;
-            
+
             // Disclaimer
             doc.setFontSize(8);
             doc.setTextColor(150, 150, 150);
-            const disclaimer = "Esta ferramenta é apenas para fins informativos. O cálculo segue as regras do CPC (arts. 219-225). Consulte sempre um advogado para casos específicos. Feriados municipais podem não estar incluídos.";
+            const disclaimer = "Ferramenta de apoio informativo. O cálculo observa o CPC (arts. 219 a 225), podendo não contemplar feriados locais ou peculiaridades do caso concreto.";
+
             const disclaimerLines = doc.splitTextToSize(disclaimer, pageWidth - 2 * margin);
             doc.text(disclaimerLines, margin, yPos);
-            
+
             yPos += disclaimerLines.length * 4 + 10;
-            
-            // Rodapé
+
+            // ============================
+            // RODAPÉ
+            // ============================
             doc.setDrawColor(0, 109, 119);
             doc.setLineWidth(0.5);
             doc.line(margin, yPos, pageWidth - margin, yPos);
-            
+
             yPos += 5;
-            
+
             doc.setFontSize(9);
             doc.setTextColor(100, 100, 100);
             doc.text("Paiva & Rocha Advocacia • www.paivaerocha.com.br", pageWidth / 2, yPos, { align: 'center' });
-            
+
             yPos += 5;
             doc.setFontSize(8);
             doc.text("Largo IX de abril, Ed. Cecisa 1, 26, Sala 622, Vila Santa Cecília, Volta Redonda/RJ", pageWidth / 2, yPos, { align: 'center' });
-            
+
             yPos += 4;
             doc.text("(24) 98119-1013 (Dr. Brener) • (24) 99989-1676 (Dr. Paulo)", pageWidth / 2, yPos, { align: 'center' });
-            
-            // Salvar PDF
+
+            // ============================
+            // SALVAR PDF
+            // ============================
             const fileName = `Calculo_Prazo_${new Date().toISOString().slice(0, 10)}_${Date.now().toString().slice(-6)}.pdf`;
             doc.save(fileName);
-            
-            // Feedback para o usuário
+
             alert('PDF gerado com sucesso! O arquivo foi baixado automaticamente.');
         }
 
@@ -1549,4 +1637,3 @@
     </script>
 </body>
 </html>
-
