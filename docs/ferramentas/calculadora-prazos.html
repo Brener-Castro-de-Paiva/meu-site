@@ -1545,10 +1545,13 @@
         doc.setFontSize(9);
         doc.setTextColor(108, 117, 125);
         doc.text("Dias Suspensos", margin + (boxWidth + 10) * 3 + boxWidth / 2, yPos + 17, { align: 'center' });
+        yPos += 35;
 
         // ============================
         // LISTAS EM GRID (5x6)
         // ============================
+        
+        checkPageBreak(50);
 
         // Dias Contados
         renderGridList({
