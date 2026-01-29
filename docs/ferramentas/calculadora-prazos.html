@@ -1172,13 +1172,13 @@ yPos = margin;
 // ============================
 function renderGridList({ title, items, getText, titleColor = [0, 0, 0] }) {
 if (!items || items.length === 0) return;
-checkPageBreak(60); // Aumentado para 60
+checkPageBreak(50); // Aumentado para 60
 // Título da seção
 doc.setFontSize(12);
 doc.setFont('helvetica', 'bold');
 doc.setTextColor(...titleColor);
 doc.text(title, margin, yPos);
-yPos += 10; // Aumentado de 8 para 10
+yPos += 8; // Aumentado de 8 para 10
 doc.setFontSize(8); // Fonte menor para caber mais
 doc.setFont('helvetica', 'normal');
 doc.setTextColor(0, 0, 0);
@@ -1194,13 +1194,13 @@ items.slice(0, maxItems).forEach((item, index) => {
 const col = Math.floor(index / maxRows);
 const row = index % maxRows;
 const x = margin + col * (colWidth + colGap);
-const y = startY + row * 4.5; // Espaçamento vertical menor
+const y = startY + row * 4.2; // Espaçamento vertical menor
 const text = getText(item);
 // Truncar texto longo para caber na coluna
 const truncated = doc.splitTextToSize(`• ${text}`, colWidth - 2);
 doc.text(truncated[0], x, y);
 });
-yPos = startY + maxRows * 4.5 + 8; // Aumentado de 5 para 8
+yPos = startY + maxRows * 4.2 + 2; // Aumentado de 5 para 8
 // Indicar se há mais itens
 if (items.length > maxItems) {
 doc.setFontSize(9);
@@ -1208,7 +1208,7 @@ doc.setTextColor(120, 120, 120);
 doc.text(`... e mais ${items.length - maxItems} dia(s)`, margin, yPos);
 yPos += 8; // Aumentado de 6 para 8
 }
-yPos += 5; // Espaço extra após cada lista
+yPos += 1.5; // Espaço extra após cada lista
 }
 // ============================
 // CABEÇALHO
