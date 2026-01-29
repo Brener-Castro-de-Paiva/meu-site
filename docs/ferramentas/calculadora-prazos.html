@@ -1,1677 +1,1487 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Prazos Processuais | Paiva & Rocha Advocacia</title>
-    <meta name="description" content="Calcule prazos processuais considerando feriados, finais de semana e suspensões. Ferramenta gratuita para advogados.">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- CSS Principal -->
-    <link rel="stylesheet" href="../style.css">
-    
-    <!-- jsPDF para geração de PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <!-- CSS Específico da Calculadora -->
-    <style>
-        /* Hero da Calculadora */
-        .hero-calculadora {
-            position: relative;
-            height: 50vh;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #343a40 0%, #006d77 100%);
-            background-image: url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1920');
-            background-size: cover;
-            background-position: center;
-            margin-top: 80px;
-        }
-
-        .hero-calculadora .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 109, 119, 0.9), rgba(52, 58, 64, 0.8));
-        }
-
-        /* Seção da Calculadora */
-        .calculadora-section {
-            padding: 5rem 0;
-            background: #f8f9fa;
-        }
-
-        /* Layout da Calculadora */
-        .calculadora-container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .calculadora-header {
-            background: linear-gradient(135deg, #006d77 0%, #0a7c8c 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .calculadora-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .calculadora-header p {
-            opacity: 0.9;
-            font-size: 1rem;
-        }
-
-        .calculadora-content {
-            padding: 2.5rem;
-        }
-
-        /* Formulário */
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #343a40;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .form-group select,
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.875rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group select:focus,
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #006d77;
-            box-shadow: 0 0 0 3px rgba(0, 109, 119, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        /* Informação sobre suspensões */
-        .suspensoes-info {
-            background-color: #f0f7ff;
-            border-left: 4px solid #006d77;
-            padding: 1rem;
-            margin-top: 0.5rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: #495057;
-        }
-
-        .suspensoes-info i {
-            color: #006d77;
-            margin-right: 0.5rem;
-        }
-
-        .suspensoes-info ul {
-            margin: 0.5rem 0 0 1.5rem;
-            padding: 0;
-        }
-
-        .suspensoes-info li {
-            margin-bottom: 0.25rem;
-        }
-
-        /* Opções de Radio */
-        .radio-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 140px;
-        }
-
-        .radio-option:hover {
-            border-color: #006d77;
-        }
-
-        .radio-option.selected {
-            border-color: #006d77;
-            background-color: #f0f7ff;
-        }
-
-        .radio-option input {
-            width: auto;
-            margin: 0;
-        }
-
-        .radio-option label {
-            margin: 0;
-            cursor: pointer;
-            font-weight: 500;
-            color: #343a40;
-        }
-
-        /* Botões de Ação */
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .btn-calcular {
-            flex: 2;
-            padding: 1rem;
-            background: linear-gradient(135deg, #006d77 0%, #0a7c8c 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-
-        .btn-pdf {
-            flex: 1;
-            padding: 1rem;
-            background: linear-gradient(135deg, #8a9a5b 0%, #6c7c4c 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-calcular:hover,
-        .btn-pdf:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-calcular:hover {
-            background: linear-gradient(135deg, #00525a 0%, #086574 100%);
-        }
-
-        .btn-pdf:hover {
-            background: linear-gradient(135deg, #798a4f 0%, #5a6a3d 100%);
-        }
-
-        /* Resultados */
-        .resultados-container {
-            display: none;
-            margin-top: 2.5rem;
-            padding: 2rem;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #006d77;
-        }
-
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #eaeaea;
-        }
-
-        .result-title {
-            color: #343a40;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .result-date {
-            background: #006d77;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .details-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .detail-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .detail-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #006d77;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-        }
-
-        .detail-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        /* Novo card para suspensões */
-        .suspensoes-card {
-            grid-column: 1 / -1;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-top: 3px solid #8a9a5b;
-        }
-
-        .suspensoes-card .detail-value {
-            color: #8a9a5b;
-        }
-
-        .suspensoes-list {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .suspensoes-list ul {
-            margin: 0;
-            padding-left: 1.5rem;
-        }
-
-        .suspensoes-list li {
-            margin-bottom: 0.5rem;
-            color: #495057;
-        }
-
-        .suspensoes-list .data-suspensao {
-            font-weight: 600;
-            color: #8a9a5b;
-        }
-
-        .day-list {
-            margin-top: 1.5rem;
-        }
-
-        .list-title {
-            color: #343a40;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .days-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-        }
-
-        .day {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .day-counted {
-            background-color: #e7f4e4;
-            color: #2e7d32;
-            border: 1px solid #c8e6c9;
-        }
-
-        .day-not-counted {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #ffcdd2;
-        }
-
-        .day-suspended {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        /* Observação */
-        .observacao {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 1.25rem;
-            margin-top: 2rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .observacao strong {
-            color: #856404;
-        }
-
-        /* Disclaimer */
-        .disclaimer {
-            font-size: 0.8rem;
-            color: #6c757d;
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #eee;
-        }
-
-        /* Responsivo */
-        @media (max-width: 768px) {
-            .calculadora-content {
-                padding: 1.5rem;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .result-header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-            
-            .details-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .radio-group {
-                flex-direction: column;
-            }
-            
-            .radio-option {
-                min-width: unset;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .suspensoes-card {
-                grid-column: 1;
-            }
-        }
-
-        /* CTA Section */
-        .cta-calculadora {
-            background: linear-gradient(135deg, #006d77, #343a40);
-            padding: 4rem 0;
-            text-align: center;
-            margin-top: 3rem;
-        }
-
-        .cta-calculadora h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .cta-calculadora p {
-            font-size: 1.125rem;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 2rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Prazos Processuais | Paiva & Rocha Advocacia</title>
+<meta name="description" content="Calcule prazos processuais considerando feriados, finais de semana e suspensões. Ferramenta gratuita para advogados.">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- CSS Principal -->
+<link rel="stylesheet" href="../style.css">
+<!-- jsPDF para geração de PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- CSS Específico da Calculadora -->
+<style>
+/* Hero da Calculadora */
+.hero-calculadora {
+position: relative;
+height: 50vh;
+min-height: 400px;
+display: flex;
+align-items: center;
+justify-content: center;
+background: linear-gradient(135deg, #343a40 0%, #006d77 100%);
+background-image: url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1920');
+background-size: cover;
+background-position: center;
+margin-top: 80px;
+}
+.hero-calculadora .hero-overlay {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, rgba(0, 109, 119, 0.9), rgba(52, 58, 64, 0.8));
+}
+/* Seção da Calculadora */
+.calculadora-section {
+padding: 5rem 0;
+background: #f8f9fa;
+}
+/* Layout da Calculadora */
+.calculadora-container {
+max-width: 900px;
+margin: 0 auto;
+background: white;
+border-radius: 15px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+overflow: hidden;
+}
+.calculadora-header {
+background: linear-gradient(135deg, #006d77 0%, #0a7c8c 100%);
+color: white;
+padding: 2rem;
+text-align: center;
+}
+.calculadora-header h2 {
+font-family: 'Playfair Display', serif;
+font-size: 2rem;
+margin-bottom: 0.5rem;
+}
+.calculadora-header p {
+opacity: 0.9;
+font-size: 1rem;
+}
+.calculadora-content {
+padding: 2.5rem;
+}
+/* Formulário */
+.form-row {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+gap: 1.5rem;
+margin-bottom: 1.5rem;
+}
+.form-group {
+margin-bottom: 1.5rem;
+}
+.form-group label {
+display: block;
+margin-bottom: 0.5rem;
+color: #343a40;
+font-weight: 600;
+font-size: 0.95rem;
+}
+.form-group select,
+.form-group input,
+.form-group textarea {
+width: 100%;
+padding: 0.875rem;
+border: 2px solid #e0e0e0;
+border-radius: 8px;
+font-family: 'Inter', sans-serif;
+font-size: 1rem;
+transition: all 0.3s ease;
+}
+.form-group select:focus,
+.form-group input:focus,
+.form-group textarea:focus {
+outline: none;
+border-color: #006d77;
+box-shadow: 0 0 0 3px rgba(0, 109, 119, 0.1);
+}
+.form-group textarea {
+resize: vertical;
+min-height: 100px;
+}
+/* Informação sobre suspensões */
+.suspensoes-info {
+background-color: #f0f7ff;
+border-left: 4px solid #006d77;
+padding: 1rem;
+margin-top: 0.5rem;
+border-radius: 6px;
+font-size: 0.85rem;
+color: #495057;
+}
+.suspensoes-info i {
+color: #006d77;
+margin-right: 0.5rem;
+}
+.suspensoes-info ul {
+margin: 0.5rem 0 0 1.5rem;
+padding: 0;
+}
+.suspensoes-info li {
+margin-bottom: 0.25rem;
+}
+/* Opções de Radio */
+.radio-group {
+display: flex;
+gap: 1rem;
+flex-wrap: wrap;
+}
+.radio-option {
+display: flex;
+align-items: center;
+gap: 0.5rem;
+padding: 0.75rem 1.25rem;
+border: 2px solid #e0e0e0;
+border-radius: 8px;
+cursor: pointer;
+transition: all 0.3s ease;
+flex: 1;
+min-width: 140px;
+}
+.radio-option:hover {
+border-color: #006d77;
+}
+.radio-option.selected {
+border-color: #006d77;
+background-color: #f0f7ff;
+}
+.radio-option input {
+width: auto;
+margin: 0;
+}
+.radio-option label {
+margin: 0;
+cursor: pointer;
+font-weight: 500;
+color: #343a40;
+}
+/* Botões de Ação */
+.action-buttons {
+display: flex;
+gap: 1rem;
+margin-top: 1.5rem;
+}
+.btn-calcular {
+flex: 2;
+padding: 1rem;
+background: linear-gradient(135deg, #006d77 0%, #0a7c8c 100%);
+color: white;
+border: none;
+border-radius: 8px;
+font-family: 'Inter', sans-serif;
+font-size: 1.1rem;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0.75rem;
+}
+.btn-pdf {
+flex: 1;
+padding: 1rem;
+background: linear-gradient(135deg, #8a9a5b 0%, #6c7c4c 100%);
+color: white;
+border: none;
+border-radius: 8px;
+font-family: 'Inter', sans-serif;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0.5rem;
+}
+.btn-calcular:hover,
+.btn-pdf:hover {
+transform: translateY(-2px);
+box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+.btn-calcular:hover {
+background: linear-gradient(135deg, #00525a 0%, #086574 100%);
+}
+.btn-pdf:hover {
+background: linear-gradient(135deg, #798a4f 0%, #5a6a3d 100%);
+}
+/* Resultados */
+.resultados-container {
+display: none;
+margin-top: 2.5rem;
+padding: 2rem;
+background: #f8f9fa;
+border-radius: 10px;
+border-left: 4px solid #006d77;
+}
+.result-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 2rem;
+padding-bottom: 1rem;
+border-bottom: 2px solid #eaeaea;
+}
+.result-title {
+color: #343a40;
+font-size: 1.5rem;
+font-weight: 700;
+}
+.result-date {
+background: #006d77;
+color: white;
+padding: 0.75rem 1.5rem;
+border-radius: 8px;
+font-size: 1.5rem;
+font-weight: 700;
+}
+.details-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+gap: 1.5rem;
+margin-bottom: 2rem;
+}
+.detail-card {
+background: white;
+padding: 1.5rem;
+border-radius: 8px;
+text-align: center;
+box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.detail-value {
+font-size: 2rem;
+font-weight: 700;
+color: #006d77;
+line-height: 1;
+margin-bottom: 0.5rem;
+}
+.detail-label {
+color: #6c757d;
+font-size: 0.9rem;
+}
+/* Novo card para suspensões */
+.suspensoes-card {
+grid-column: 1 / -1;
+background: white;
+padding: 1.5rem;
+border-radius: 8px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+border-top: 3px solid #8a9a5b;
+}
+.suspensoes-card .detail-value {
+color: #8a9a5b;
+}
+.suspensoes-list {
+margin-top: 1rem;
+padding: 1rem;
+background: #f8f9fa;
+border-radius: 6px;
+font-size: 0.9rem;
+}
+.suspensoes-list ul {
+margin: 0;
+padding-left: 1.5rem;
+}
+.suspensoes-list li {
+margin-bottom: 0.5rem;
+color: #495057;
+}
+.suspensoes-list .data-suspensao {
+font-weight: 600;
+color: #8a9a5b;
+}
+.day-list {
+margin-top: 1.5rem;
+}
+.list-title {
+color: #343a40;
+margin-bottom: 0.75rem;
+font-weight: 600;
+font-size: 1.1rem;
+}
+.days-container {
+display: flex;
+flex-wrap: wrap;
+gap: 0.5rem;
+margin-top: 0.75rem;
+}
+.day {
+padding: 0.5rem 1rem;
+border-radius: 6px;
+font-size: 0.85rem;
+font-weight: 500;
+}
+.day-counted {
+background-color: #e7f4e4;
+color: #2e7d32;
+border: 1px solid #c8e6c9;
+}
+.day-not-counted {
+background-color: #ffebee;
+color: #c62828;
+border: 1px solid #ffcdd2;
+}
+.day-suspended {
+background-color: #fff3cd;
+color: #856404;
+border: 1px solid #ffeaa7;
+}
+/* Observação */
+.observacao {
+background-color: #fff3cd;
+border-left: 4px solid #ffc107;
+padding: 1.25rem;
+margin-top: 2rem;
+border-radius: 8px;
+font-size: 0.9rem;
+}
+.observacao strong {
+color: #856404;
+}
+/* Disclaimer */
+.disclaimer {
+font-size: 0.8rem;
+color: #6c757d;
+text-align: center;
+margin-top: 2rem;
+padding-top: 1.5rem;
+border-top: 1px solid #eee;
+}
+/* Responsivo */
+@media (max-width: 768px) {
+.calculadora-content {
+padding: 1.5rem;
+}
+.form-row {
+grid-template-columns: 1fr;
+}
+.result-header {
+flex-direction: column;
+gap: 1rem;
+text-align: center;
+}
+.details-grid {
+grid-template-columns: 1fr;
+}
+.radio-group {
+flex-direction: column;
+}
+.radio-option {
+min-width: unset;
+}
+.action-buttons {
+flex-direction: column;
+}
+.suspensoes-card {
+grid-column: 1;
+}
+}
+/* CTA Section */
+.cta-calculadora {
+background: linear-gradient(135deg, #006d77, #343a40);
+padding: 4rem 0;
+text-align: center;
+margin-top: 3rem;
+}
+.cta-calculadora h2 {
+font-family: 'Playfair Display', serif;
+font-size: 2rem;
+color: white;
+margin-bottom: 1rem;
+}
+.cta-calculadora p {
+font-size: 1.125rem;
+color: rgba(255,255,255,0.9);
+margin-bottom: 2rem;
+}
+</style>
 </head>
 <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJSKVTP3" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    
-    <!-- Header -->
-    <header class="header" id="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="../index.html" class="logo">
-                    <i class="fas fa-balance-scale"></i>
-                    <div class="logo-text">
-                        <h1>Paiva & Rocha</h1>
-                        <span>Advocacia</span>
-                    </div>
-                </a>
-                
-                <nav class="nav" id="nav">
-                    <ul class="nav-list">
-                        <li><a href="../index.html" class="nav-link">Início</a></li>
-                        <li class="nav-dropdown">
-                            <a href="#servicos" class="nav-link nav-link-dropdown">
-                                Serviços <i class="fas fa-chevron-down dropdown-icon"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="calculadora-prazos.html" class="active">
-                                        <i class="fas fa-calendar-alt"></i> Calculadora de Prazos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="assinatura-eletronica.html">
-                                        <i class="fas fa-pen-nib"></i> Assinatura Eletrônica
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><a href="../sobre.html" class="nav-link">Sobre</a></li>
-                        <li><a href="../index.html#conte-seu-caso" class="nav-link">Conte seu Caso</a></li>
-                        <li><a href="../artigos/artigo/index.html" class="nav-link">Artigos</a></li>
-                        <li><a href="../index.html#contato" class="nav-link">Contato</a></li>
-                    </ul>
-                
-                    <div class="contact-buttons">
-                        <a href="https://wa.me/5524981191013" target="_blank" class="btn-contact">
-                            <i class="fab fa-whatsapp"></i>
-                            <span class="contact-name">Dr. Brener</span>
-                            <span class="contact-phone">(24) 981191013</span>
-                        </a>
-                        <a href="https://wa.me/5524999891676" target="_blank" class="btn-contact">
-                            <i class="fab fa-whatsapp"></i>
-                            <span class="contact-name">Dr. Paulo</span>
-                            <span class="contact-phone">(24) 99989-1676</span>
-                        </a>
-                    </div>
-                </nav>
-                
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Hero -->
-    <section class="hero-calculadora">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <div class="container">
-                <div style="text-align: center; color: white;">
-                    <h2 class="hero-title">Calculadora de Prazos Processuais</h2>
-                    <p class="hero-subtitle">Calcule prazos considerando feriados, finais de semana e suspensões</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Calculadora -->
-    <section class="calculadora-section">
-        <div class="container">
-            <div class="calculadora-container">
-                <div class="calculadora-header">
-                    <h2>Calcule seu Prazo</h2>
-                    <p>Preencha os campos abaixo para calcular o prazo final processual</p>
-                </div>
-                
-                <div class="calculadora-content">
-                    <!-- Formulário -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="state">Estado:</label>
-                            <select id="state">
-                                <option value="">Selecione o estado</option>
-                                <option value="AC">Acre</option>
-                                <option value="AL">Alagoas</option>
-                                <option value="AP">Amapá</option>
-                                <option value="AM">Amazonas</option>
-                                <option value="BA">Bahia</option>
-                                <option value="CE">Ceará</option>
-                                <option value="DF">Distrito Federal</option>
-                                <option value="ES">Espírito Santo</option>
-                                <option value="GO">Goiás</option>
-                                <option value="MA">Maranhão</option>
-                                <option value="MT">Mato Grosso</option>
-                                <option value="MS">Mato Grosso do Sul</option>
-                                <option value="MG">Minas Gerais</option>
-                                <option value="PA">Paraná</option>
-                                <option value="PB">Paraíba</option>
-                                <option value="PR">Paraná</option>
-                                <option value="PE">Pernambuco</option>
-                                <option value="PI">Piauí</option>
-                                <option value="RJ" selected>Rio de Janeiro</option>
-                                <option value="RN">Rio Grande do Norte</option>
-                                <option value="RS">Rio Grande do Sul</option>
-                                <option value="RO">Rondônia</option>
-                                <option value="RR">Roraima</option>
-                                <option value="SC">Santa Catarina</option>
-                                <option value="SP">São Paulo</option>
-                                <option value="SE">Sergipe</option>
-                                <option value="TO">Tocantins</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="city">Cidade (opcional):</label>
-                            <input type="text" id="city" placeholder="Digite a cidade">
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="startDate">Data Inicial:</label>
-                            <input type="date" id="startDate">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="days">Número de Dias:</label>
-                            <input type="number" id="days" min="1" max="365" value="15" placeholder="Ex: 15">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Tipo de Processo:</label>
-                        <div class="radio-group">
-                            <div class="radio-option selected" onclick="selectOption(this, 'processType')">
-                                <input type="radio" id="physical" name="processType" value="physical" checked>
-                                <label for="physical">Processo Físico</label>
-                            </div>
-                            <div class="radio-option" onclick="selectOption(this, 'processType')">
-                                <input type="radio" id="electronic" name="processType" value="electronic">
-                                <label for="electronic">Processo Eletrônico</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Tipo de Prazo:</label>
-                        <div class="radio-group">
-                            <div class="radio-option selected" onclick="selectOption(this, 'deadlineType')">
-                                <input type="radio" id="workDays" name="deadlineType" value="work" checked>
-                                <label for="workDays">Dias Úteis</label>
-                            </div>
-                            <div class="radio-option" onclick="selectOption(this, 'deadlineType')">
-                                <input type="radio" id="calendarDays" name="deadlineType" value="calendar">
-                                <label for="calendarDays">Dias Corridos</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- NOVO: Campo para suspensões -->
-                    <div class="form-group">
-                        <label for="suspensoes">Insira Suspensões (opcional):</label>
-                        <textarea id="suspensoes" placeholder="Informe datas suspensas no formato: DD/MM/AAAA - Motivo. Exemplos:
-• 25/12/2025 - Feriado de Natal
-• 01/01/2025 - Feriado de Ano Novo
-• 20/04/2025 - Recesso forense
-• 15/08/2025 - Férias coletivas"></textarea>
-                        
-                        <div class="suspensoes-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Como informar suspensões:</strong>
-                            <ul>
-                                <li>Uma data por linha</li>
-                                <li>Formato: DD/MM/AAAA - Motivo</li>
-                                <li>Exemplo: 25/12/2026 - Natal</li>
-                                <li>As datas informadas serão adicionadas aos feriados e não serão contadas</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn-calcular" onclick="calculateDeadline()">
-                            <i class="fas fa-calculator"></i>
-                            Calcular Prazo Final
-                        </button>
-                        <button class="btn-pdf" onclick="gerarPDF()" id="btnPDF" disabled>
-                            <i class="fas fa-file-pdf"></i>
-                            Gerar PDF
-                        </button>
-                    </div>
-                    
-                    <!-- Resultados -->
-                    <div class="resultados-container" id="resultados">
-                        <div class="result-header">
-                            <div class="result-title">Prazo Final:</div>
-                            <div class="result-date" id="finalDateResult">--/--/----</div>
-                        </div>
-                        
-                        <div class="details-grid">
-                            <div class="detail-card">
-                                <div class="detail-value" id="totalDaysResult">0</div>
-                                <div class="detail-label">Dias Solicitados</div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-value" id="countedDaysResult">0</div>
-                                <div class="detail-label">Dias Contados</div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-value" id="excludedDaysResult">0</div>
-                                <div class="detail-label">Dias Não Contados</div>
-                            </div>
-                            <div class="suspensoes-card">
-                                <div class="detail-value" id="suspendedDaysResult">0</div>
-                                <div class="detail-label">Dias suspensos pelo usuário</div>
-                                <div class="suspensoes-list" id="suspendedDaysList">
-                                    <!-- Lista de suspensões será exibida aqui -->
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="day-list">
-                            <div class="list-title">Dias Contados para o Prazo:</div>
-                            <div class="days-container" id="countedDaysList">
-                                <!-- Dias contados serão listados aqui -->
-                            </div>
-                        </div>
-                        
-                        <div class="day-list">
-                            <div class="list-title">Dias Não Contados:</div>
-                            <div class="days-container" id="excludedDaysList">
-                                <!-- Dias não contados serão listados aqui -->
-                            </div>
-                        </div>
-                        
-                        <div class="observacao">
-                            <strong>Observação importante:</strong>
-                            <p id="processObservation">Para processo físico, o prazo termina no final do horário do fórum. Para processo eletrônico, o prazo termina às 24h do último dia. Este cálculo considera feriados nacionais, estaduais e as suspensões informadas.</p>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 2rem;">
-                            <button class="btn-pdf" onclick="gerarPDF()">
-                                <i class="fas fa-file-pdf"></i>
-                                Baixar em PDF
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="disclaimer">
-                        <p>Esta calculadora considera feriados nacionais e estaduais. Feriados municipais podem não estar incluídos. O cálculo segue as regras do CPC (arts. 219-225). Consulte sempre um advogado para casos específicos. Esta ferramenta é apenas para fins informativos.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-calculadora">
-        <div class="container">
-            <i class="fas fa-balance-scale" style="font-size: 3.5rem; color: white; margin-bottom: 1.5rem;"></i>
-            <h2>Precisa de Análise Jurídica Especializada?</h2>
-            <p>Nossa equipe está pronta para analisar seu caso e oferecer a melhor solução jurídica</p>
-            <a href="../index.html#conte-seu-caso" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: white; color: #006d77; border-radius: 50px; text-decoration: none; font-weight: 600;">
-                <i class="fas fa-comment-dots"></i>
-                Fale com um Advogado
-            </a>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer" id="contato">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-col">
-                    <div class="logo">
-                        <i class="fas fa-balance-scale"></i>
-                        <div class="logo-text">
-                            <h3>Paiva & Rocha</h3>
-                            <span>Advocacia</span>
-                        </div>
-                    </div>
-                    <p>Excelência jurídica aliada à inovação tecnológica para defender seus direitos com eficiência.</p>
-                </div>
-                
-                <div class="footer-col">
-                    <h4>Links Rápidos</h4>
-                    <ul>
-                        <li><a href="../index.html">Início</a></li>
-                        <li><a href="../index.html#servicos">Serviços</a></li>
-                        <li><a href="../sobre.html">Sobre</a></li>
-                        <li><a href="../artigos/artigo/index.html">Artigos</a></li>
-                        <li><a href="../index.html#conte-seu-caso">Conte seu Caso</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h4>Áreas de Atuação</h4>
-                    <ul>
-                        <li><a href="../index.html#servicos">Direito Civil</a></li>
-                        <li><a href="../index.html#servicos">Direito Previdenciário</a></li>
-                        <li><a href="../index.html#servicos">Direito Tributário</a></li>
-                        <li><a href="../index.html#servicos">Direito Público</a></li>
-                        <li><a href="../index.html#servicos">Direito do Consumidor</a></li>
-                        <li><a href="../index.html#servicos">Direito Digital</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h4>Contato</h4>
-                    <ul class="contact-info">
-                        <li>
-                            <i class="fas fa-user"></i>
-                            <span>Dr. Brener Castro</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-phone"></i>
-                            <a href="tel:+5524981191013">(24) 98119-1013</a>
-                        </li>
-                        <li style="margin-top: 1rem;">
-                            <i class="fas fa-user"></i>
-                            <span>Dr. Paulo Roberto Rocha</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-phone"></i>
-                            <a href="tel:+5524999891676">(24) 99989-1676</a>
-                        </li>
-                        <li style="margin-top: 1rem;">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Largo IX de abril, Ed. Cecisa 1, 26, Sala 622, Vila Santa Cecília, Volta Redonda/RJ, CEP: 27.260-180.</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-clock"></i>
-                            <span>Seg - Sex: 9h às 18h</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2025 Paiva & Rocha Advocacia. Todos os direitos reservados.</p>
-                <p>OAB/RJ - Inscrito na Ordem dos Advogados do Brasil</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript Principal -->
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJSKVTP3" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- Header -->
+<header class="header" id="header">
+<div class="container">
+<div class="header-content">
+<a href="../index.html" class="logo">
+<i class="fas fa-balance-scale"></i>
+<div class="logo-text">
+<h1>Paiva & Rocha</h1>
+<span>Advocacia</span>
+</div>
+</a>
+<nav class="nav" id="nav">
+<ul class="nav-list">
+<li><a href="../index.html" class="nav-link">Início</a></li>
+<li class="nav-dropdown">
+<a href="#servicos" class="nav-link nav-link-dropdown">
+Serviços <i class="fas fa-chevron-down dropdown-icon"></i>
+</a>
+<ul class="dropdown-menu">
+<li>
+<a href="calculadora-prazos.html" class="active">
+<i class="fas fa-calendar-alt"></i> Calculadora de Prazos
+</a>
+</li>
+<li>
+<a href="assinatura-eletronica.html">
+<i class="fas fa-pen-nib"></i> Assinatura Eletrônica
+</a>
+</li>
+</ul>
+</li>
+<li><a href="../sobre.html" class="nav-link">Sobre</a></li>
+<li><a href="../index.html#conte-seu-caso" class="nav-link">Conte seu Caso</a></li>
+<li><a href="../artigos/artigo/index.html" class="nav-link">Artigos</a></li>
+<li><a href="../index.html#contato" class="nav-link">Contato</a></li>
+</ul>
+<div class="contact-buttons">
+<a href="https://wa.me/5524981191013" target="_blank" class="btn-contact">
+<i class="fab fa-whatsapp"></i>
+<span class="contact-name">Dr. Brener</span>
+<span class="contact-phone">(24) 981191013</span>
+</a>
+<a href="https://wa.me/5524999891676" target="_blank" class="btn-contact">
+<i class="fab fa-whatsapp"></i>
+<span class="contact-name">Dr. Paulo</span>
+<span class="contact-phone">(24) 99989-1676</span>
+</a>
+</div>
+</nav>
+<button class="mobile-menu-btn" id="mobileMenuBtn">
+<span></span>
+<span></span>
+<span></span>
+</button>
+</div>
+</div>
+</header>
+<!-- Hero -->
+<section class="hero-calculadora">
+<div class="hero-overlay"></div>
+<div class="hero-content">
+<div class="container">
+<div style="text-align: center; color: white;">
+<h2 class="hero-title">Calculadora de Prazos Processuais</h2>
+<p class="hero-subtitle">Calcule prazos considerando feriados, finais de semana e suspensões</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Calculadora -->
+<section class="calculadora-section">
+<div class="container">
+<div class="calculadora-container">
+<div class="calculadora-header">
+<h2>Calcule seu Prazo</h2>
+<p>Preencha os campos abaixo para calcular o prazo final processual</p>
+</div>
+<div class="calculadora-content">
+<!-- Formulário -->
+<div class="form-row">
+<div class="form-group">
+<label for="state">Estado:</label>
+<select id="state">
+<option value="">Selecione o estado</option>
+<option value="AC">Acre</option>
+<option value="AL">Alagoas</option>
+<option value="AP">Amapá</option>
+<option value="AM">Amazonas</option>
+<option value="BA">Bahia</option>
+<option value="CE">Ceará</option>
+<option value="DF">Distrito Federal</option>
+<option value="ES">Espírito Santo</option>
+<option value="GO">Goiás</option>
+<option value="MA">Maranhão</option>
+<option value="MT">Mato Grosso</option>
+<option value="MS">Mato Grosso do Sul</option>
+<option value="MG">Minas Gerais</option>
+<option value="PA">Paraná</option>
+<option value="PB">Paraíba</option>
+<option value="PR">Paraná</option>
+<option value="PE">Pernambuco</option>
+<option value="PI">Piauí</option>
+<option value="RJ" selected>Rio de Janeiro</option>
+<option value="RN">Rio Grande do Norte</option>
+<option value="RS">Rio Grande do Sul</option>
+<option value="RO">Rondônia</option>
+<option value="RR">Roraima</option>
+<option value="SC">Santa Catarina</option>
+<option value="SP">São Paulo</option>
+<option value="SE">Sergipe</option>
+<option value="TO">Tocantins</option>
+</select>
+</div>
+<div class="form-group">
+<label for="city">Cidade (opcional):</label>
+<input type="text" id="city" placeholder="Digite a cidade">
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label for="startDate">Data Inicial:</label>
+<input type="date" id="startDate">
+</div>
+<div class="form-group">
+<label for="days">Número de Dias:</label>
+<input type="number" id="days" min="1" max="365" value="15" placeholder="Ex: 15">
+</div>
+</div>
+<div class="form-group">
+<label>Tipo de Processo:</label>
+<div class="radio-group">
+<div class="radio-option selected" onclick="selectOption(this, 'processType')">
+<input type="radio" id="physical" name="processType" value="physical" checked>
+<label for="physical">Processo Físico</label>
+</div>
+<div class="radio-option" onclick="selectOption(this, 'processType')">
+<input type="radio" id="electronic" name="processType" value="electronic">
+<label for="electronic">Processo Eletrônico</label>
+</div>
+</div>
+</div>
+<div class="form-group">
+<label>Tipo de Prazo:</label>
+<div class="radio-group">
+<div class="radio-option selected" onclick="selectOption(this, 'deadlineType')">
+<input type="radio" id="workDays" name="deadlineType" value="work" checked>
+<label for="workDays">Dias Úteis</label>
+</div>
+<div class="radio-option" onclick="selectOption(this, 'deadlineType')">
+<input type="radio" id="calendarDays" name="deadlineType" value="calendar">
+<label for="calendarDays">Dias Corridos</label>
+</div>
+</div>
+</div>
+<!-- NOVO: Campo para suspensões -->
+<div class="form-group">
+<label for="suspensoes">Insira Suspensões (opcional):</label>
+<textarea id="suspensoes" placeholder="Informe datas suspensas no formato: DD/MM/AAAA - Motivo. Exemplos:
+• 17/07/2025 - Feriado Municipal
+• 01/03/2025 - Indisponibilidade"></textarea>
+<div class="suspensoes-info">
+<i class="fas fa-info-circle"></i>
+<strong>Como informar suspensões:</strong>
+<ul>
+<li>Uma data por linha</li>
+<li>Formato: DD/MM/AAAA - Motivo</li>
+<li>Exemplo: 25/12/2026 - Natal</li>
+<li>As datas informadas serão adicionadas aos feriados e não serão contadas</li>
+</ul>
+</div>
+</div>
+<div class="action-buttons">
+<button class="btn-calcular" onclick="calculateDeadline()">
+<i class="fas fa-calculator"></i>
+Calcular Prazo Final
+</button>
+<button class="btn-pdf" onclick="gerarPDF()" id="btnPDF" disabled>
+<i class="fas fa-file-pdf"></i>
+Gerar PDF
+</button>
+</div>
+<!-- Resultados -->
+<div class="resultados-container" id="resultados">
+<div class="result-header">
+<div class="result-title">Prazo Final:</div>
+<div class="result-date" id="finalDateResult">--/--/----</div>
+</div>
+<div class="details-grid">
+<div class="detail-card">
+<div class="detail-value" id="totalDaysResult">0</div>
+<div class="detail-label">Dias Solicitados</div>
+</div>
+<div class="detail-card">
+<div class="detail-value" id="countedDaysResult">0</div>
+<div class="detail-label">Dias Contados</div>
+</div>
+<div class="detail-card">
+<div class="detail-value" id="excludedDaysResult">0</div>
+<div class="detail-label">Dias Não Contados</div>
+</div>
+<div class="suspensoes-card">
+<div class="detail-value" id="suspendedDaysResult">0</div>
+<div class="detail-label">Dias suspensos pelo usuário</div>
+<div class="suspensoes-list" id="suspendedDaysList">
+<!-- Lista de suspensões será exibida aqui -->
+</div>
+</div>
+</div>
+<div class="day-list">
+<div class="list-title">Dias Contados para o Prazo:</div>
+<div class="days-container" id="countedDaysList">
+<!-- Dias contados serão listados aqui -->
+</div>
+</div>
+<div class="day-list">
+<div class="list-title">Dias Não Contados:</div>
+<div class="days-container" id="excludedDaysList">
+<!-- Dias não contados serão listados aqui -->
+</div>
+</div>
+<div class="observacao">
+<strong>Observação importante:</strong>
+<p id="processObservation">Para processo físico, o prazo termina no final do horário do fórum. Para processo eletrônico, o prazo termina às 24h do último dia. Este cálculo considera feriados nacionais, estaduais e as suspensões informadas.</p>
+</div>
+<div style="text-align: center; margin-top: 2rem;">
+<button class="btn-pdf" onclick="gerarPDF()">
+<i class="fas fa-file-pdf"></i>
+Baixar em PDF
+</button>
+</div>
+</div>
+<div class="disclaimer">
+<p>Esta calculadora considera feriados nacionais e estaduais. Feriados municipais podem não estar incluídos. O cálculo segue as regras do CPC (arts. 219-225). Consulte sempre um advogado para casos específicos. Esta ferramenta é apenas para fins informativos.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="cta-calculadora">
+<div class="container">
+<i class="fas fa-balance-scale" style="font-size: 3.5rem; color: white; margin-bottom: 1.5rem;"></i>
+<h2>Precisa de Análise Jurídica Especializada?</h2>
+<p>Nossa equipe está pronta para analisar seu caso e oferecer a melhor solução jurídica</p>
+<a href="../index.html#conte-seu-caso" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: white; color: #006d77; border-radius: 50px; text-decoration: none; font-weight: 600;">
+<i class="fas fa-comment-dots"></i>
+Fale com um Advogado
+</a>
+</div>
+</section>
+<!-- Footer -->
+<footer class="footer" id="contato">
+<div class="container">
+<div class="footer-content">
+<div class="footer-col">
+<div class="logo">
+<i class="fas fa-balance-scale"></i>
+<div class="logo-text">
+<h3>Paiva & Rocha</h3>
+<span>Advocacia</span>
+</div>
+</div>
+<p>Excelência jurídica aliada à inovação tecnológica para defender seus direitos com eficiência.</p>
+</div>
+<div class="footer-col">
+<h4>Links Rápidos</h4>
+<ul>
+<li><a href="../index.html">Início</a></li>
+<li><a href="../index.html#servicos">Serviços</a></li>
+<li><a href="../sobre.html">Sobre</a></li>
+<li><a href="../artigos/artigo/index.html">Artigos</a></li>
+<li><a href="../index.html#conte-seu-caso">Conte seu Caso</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Áreas de Atuação</h4>
+<ul>
+<li><a href="../index.html#servicos">Direito Civil</a></li>
+<li><a href="../index.html#servicos">Direito Previdenciário</a></li>
+<li><a href="../index.html#servicos">Direito Tributário</a></li>
+<li><a href="../index.html#servicos">Direito Público</a></li>
+<li><a href="../index.html#servicos">Direito do Consumidor</a></li>
+<li><a href="../index.html#servicos">Direito Digital</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Contato</h4>
+<ul class="contact-info">
+<li>
+<i class="fas fa-user"></i>
+<span>Dr. Brener Castro</span>
+</li>
+<li>
+<i class="fas fa-phone"></i>
+<a href="tel:+5524981191013">(24) 98119-1013</a>
+</li>
+<li style="margin-top: 1rem;">
+<i class="fas fa-user"></i>
+<span>Dr. Paulo Roberto Rocha</span>
+</li>
+<li>
+<i class="fas fa-phone"></i>
+<a href="tel:+5524999891676">(24) 99989-1676</a>
+</li>
+<li style="margin-top: 1rem;">
+<i class="fas fa-map-marker-alt"></i>
+<span>Largo IX de abril, Ed. Cecisa 1, 26, Sala 622, Vila Santa Cecília, Volta Redonda/RJ, CEP: 27.260-180.</span>
+</li>
+<li>
+<i class="fas fa-clock"></i>
+<span>Seg - Sex: 9h às 18h</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; 2025 Paiva & Rocha Advocacia. Todos os direitos reservados.</p>
+<p>OAB/RJ - Inscrito na Ordem dos Advogados do Brasil</p>
+</div>
+</div>
+</footer>
+<!-- JavaScript Principal -->
 <script src="../script.js"></script>
-
 <!-- JavaScript da Calculadora -->
 <script>
-    // Feriados Nacionais 2026
-    const nationalHolidays = [
-        '2026-01-01',
-        '2026-02-16',
-        '2026-02-17',
-        '2026-04-03',
-        '2026-04-21',
-        '2026-05-01',
-        '2026-06-04',
-        '2026-09-07',
-        '2026-10-12',
-        '2026-11-02',
-        '2026-11-15',
-        '2026-12-25'
-    ];
-
-    // Feriados Estaduais (exemplos)
-    const stateHolidays = {
-        'SP': ['2026-07-09'], // Revolução Constitucionalista
-        'RJ': ['2026-04-23'], // Dia de São Jorge - FERIADO DO RJ
-        'MG': ['2026-04-21'], // Data Magna de MG
-        'RS': ['2026-09-20'], // Revolução Farroupilha
-        'PR': ['2026-12-19'], // Emancipação do Paraná
-        'SC': ['2026-08-11'], // Dia de Santa Catarina
-        'BA': ['2026-07-02'], // Independência da Bahia
-        'DF': ['2026-04-21']  // Fundação de Brasília
-    };
-
-    // Variáveis para armazenar dados do cálculo
-    let currentCalculation = null;
-    let userSuspendedDates = [];
-
-    // Inicializar data atual
-    document.getElementById('startDate').valueAsDate = new Date();
-
-    // Função para selecionar opções de rádio com estilo
-    function selectOption(element, groupName) {
-        const groupElements = document.querySelectorAll(`[name="${groupName}"]`);
-        groupElements.forEach(input => {
-            input.parentElement.classList.remove('selected');
-        });
-        
-        element.classList.add('selected');
-        
-        const radioInput = element.querySelector('input[type="radio"]');
-        if (radioInput) {
-            radioInput.checked = true;
-        }
-    }
-
-    // Função para processar suspensões informadas pelo usuário
-    function processSuspendedDates() {
-        const suspensoesText = document.getElementById('suspensoes').value;
-        userSuspendedDates = [];
-        
-        if (!suspensoesText.trim()) {
-            return [];
-        }
-        
-        const lines = suspensoesText.split('\n');
-        const suspendedDates = [];
-        
-        lines.forEach(line => {
-            line = line.trim();
-            if (!line) return;
-            
-            // Extrair data do formato DD/MM/AAAA
-            const dateMatch = line.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-            if (dateMatch) {
-                const day = parseInt(dateMatch[1]);
-                const month = parseInt(dateMatch[2]) - 1; // JavaScript months are 0-indexed
-                const year = parseInt(dateMatch[3]);
-                
-                // Extrair motivo (tudo após o hífen)
-                const motivoMatch = line.match(/-\s*(.+)/);
-                const motivo = motivoMatch ? motivoMatch[1].trim() : 'Suspensão informada pelo usuário';
-                
-                const date = new Date(year, month, day);
-                if (!isNaN(date.getTime())) {
-                    // Formatar data para YYYY-MM-DD para comparação (usando data local)
-                    const y = date.getFullYear();
-                    const m = String(date.getMonth() + 1).padStart(2, '0');
-                    const d = String(date.getDate()).padStart(2, '0');
-                    const dateStr = `${y}-${m}-${d}`;
-                    suspendedDates.push({
-                        date: date,
-                        dateStr: dateStr,
-                        motivo: motivo,
-                        originalLine: line
-                    });
-                }
-            }
-        });
-        
-        return suspendedDates;
-    }
-
-    // Verificar se é dia útil (SEM verificar suspensões do usuário)
-    function isWorkDay(date) {
-        const dayOfWeek = date.getDay();
-        
-        // Verificar se é sábado ou domingo
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-            return false;
-        }
-        
-        // Formatar data para comparação (usando data local para evitar erro de fuso horário)
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-        
-        // Verificar se é feriado nacional
-        if (nationalHolidays.includes(dateStr)) {
-            return false;
-        }
-        
-        // Verificar se é feriado estadual
-        const state = document.getElementById('state').value;
-        if (state && stateHolidays[state]) {
-            if (stateHolidays[state].includes(dateStr)) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-
-    // Verificar se data está suspensa pelo usuário
-    function isUserSuspendedDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-        
-        return userSuspendedDates.find(s => s.dateStr === dateStr);
-    }
-
-    // Calcular prazo final
-    function calculateDeadline() {
-        const startDateInput = document.getElementById('startDate').value;
-        const days = parseInt(document.getElementById('days').value);
-        const state = document.getElementById('state').value;
-        const processType = document.querySelector('input[name="processType"]:checked').value;
-        const deadlineType = document.querySelector('input[name="deadlineType"]:checked').value;
-        const city = document.getElementById('city').value;
-        
-        // Processar datas suspensas
-        userSuspendedDates = deadlineType === 'work'
-            ? processSuspendedDates()
-            : [];
-        
-        if (!startDateInput) {
-            alert('Por favor, selecione uma data inicial.');
-            return;
-        }
-        
-        if (!days || days < 1) {
-            alert('Por favor, informe um número válido de dias.');
-            return;
-        }
-        
-        // REGRA DO CPC (art. 224):
-        // Exclui o dia do começo e inicia a contagem no dia seguinte
-        
-        // Tratamento de data para evitar problemas de fuso horário (cria data local 00:00)
-        const dateParts = startDateInput.split('-');
-        let currentDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-
-        // A contagem sempre começa no dia seguinte ao evento (Exclui o dia do começo)
-        currentDate.setDate(currentDate.getDate() + 1);
-
-        // Para prazos em dias úteis (art. 219 do CPC),
-        // a contagem deve iniciar no primeiro dia útil subsequente
-        if (deadlineType === 'work') {
-            while (!isWorkDay(currentDate) || isUserSuspendedDate(currentDate)) {
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-        }
-
-        const countedDays = [];
-        const excludedDays = [];
-        const suspendedDays = [];
-        let daysCounted = 0;
-        let totalDaysPassed = 0;
-        
-        if (deadlineType === 'work') {
-            while (daysCounted < days) {
-                const y = currentDate.getFullYear();
-                const m = String(currentDate.getMonth() + 1).padStart(2, '0');
-                const d = String(currentDate.getDate()).padStart(2, '0');
-                const dateStr = `${y}-${m}-${d}`;
-
-                // Verificar primeiro se é data suspensa pelo usuário
-                const suspendedDate = isUserSuspendedDate(currentDate);
-                
-                if (suspendedDate) {
-                    // É uma data suspensa - não conta como dia útil
-                    suspendedDays.push({
-                        date: new Date(currentDate),
-                        motivo: suspendedDate.motivo
-                    });
-
-                    excludedDays.push({
-                        date: new Date(currentDate),
-                        type: 'suspended',
-                        motivo: suspendedDate.motivo
-                    });
-                    
-                    // Avança para o próximo dia
-                    currentDate.setDate(currentDate.getDate() + 1);
-                    totalDaysPassed++;
-                    continue;
-                }
-                
-                // Se não for suspensa, verificar se é dia útil
-                if (isWorkDay(currentDate)) {
-                    // É dia útil normal
-                    daysCounted++;
-                    countedDays.push({
-                        date: new Date(currentDate),
-                        type: 'workday'
-                    });
-                } else {
-                    // Não é dia útil (fim de semana ou feriado)
-                    const dayOfWeek = currentDate.getDay();
-                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
-                    
-                    // Verificar se é feriado nacional
-                    const isNationalHoliday = nationalHolidays.includes(dateStr);
-                    
-                    // Verificar se é feriado estadual
-                    let isStateHoliday = false;
-                    if (state && stateHolidays[state]) {
-                        isStateHoliday = stateHolidays[state].includes(dateStr);
-                    }
-
-                    excludedDays.push({
-                        date: new Date(currentDate),
-                        type: isWeekend ? 'weekend' : 'holiday',
-                        motivo: isWeekend ? '' : 
-                               (isNationalHoliday ? 'Feriado Nacional' : 
-                               (isStateHoliday ? 'Feriado Estadual' : 'Feriado'))
-                    });
-                }
-
-                totalDaysPassed++;
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            // vencimento = último dia útil contado
-            currentDate.setDate(currentDate.getDate() - 1);
-        } else {
-            // ============================
-            // DIAS CORRIDOS (CPC art. 224)
-            // ============================
-
-            // Tratamento de data para evitar problemas de fuso horário
-            const tempDateParts = startDateInput.split('-');
-            let tempDate = new Date(tempDateParts[0], tempDateParts[1] - 1, tempDateParts[2]);
-
-            // Exclui o dia do começo (A contagem inicia no dia seguinte)
-            tempDate.setDate(tempDate.getDate() + 1);
-
-            for (let i = 0; i < days; i++) {
-                countedDays.push({
-                    date: new Date(tempDate),
-                    type: 'calendar'
-                });
-
-                // avança sempre
-                tempDate.setDate(tempDate.getDate() + 1);
-            }
-
-            // vencimento = último dia contado
-            tempDate.setDate(tempDate.getDate() - 1);
-            currentDate = new Date(tempDate);
-
-            totalDaysPassed = days;
-        }
-              
-        // Armazenar dados do cálculo
-        currentCalculation = {
-            startDate: new Date(
-                dateParts[0],
-                dateParts[1] - 1,
-                dateParts[2]
-            ),
-            days: days,
-            state: state,
-            city: city,
-            processType: processType,
-            deadlineType: deadlineType,
-            finalDate: currentDate,
-            countedDays: countedDays,
-            excludedDays: excludedDays,
-            suspendedDays: suspendedDays,
-            userSuspendedDates: userSuspendedDates,
-            countedDaysCount: countedDays.length,
-            excludedDaysCount: excludedDays.length,
-            suspendedDaysCount: suspendedDays.length
-        };
-        
-        // Ativar botão de PDF
-        document.getElementById('btnPDF').disabled = false;
-        
-        // Atualizar observação
-        const observation = document.getElementById('processObservation');
-        const suspensoesText = (deadlineType === 'work' && suspendedDays.length > 0)
-            ? `incluindo ${suspendedDays.length} dia(s) de suspensão informado(s) pelo usuário.`
-            : 'Este cálculo considera feriados nacionais e estaduais.';
-        
-        if (processType === 'electronic') {
-            observation.textContent = `Para processo eletrônico, o prazo termina às 24h do último dia. ${suspensoesText}`;
-        } else {
-            observation.textContent = `Para processo físico, o prazo termina no final do horário do fórum (normalmente 18h). ${suspensoesText}`;
-        }
-        
-        // Exibir resultados
-        displayResults(currentDate, days, countedDays.length, excludedDays.length, suspendedDays.length, countedDays, excludedDays, suspendedDays);
-        
-        // Scroll para resultados
-        document.getElementById('resultados').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Exibir resultados
-    function displayResults(finalDate, totalDays, countedDays, excludedDays, suspendedDays, countedDaysList, excludedDaysList, suspendedDaysList) {
-        const formattedDate = finalDate.toLocaleDateString('pt-BR');
-        
-        document.getElementById('finalDateResult').textContent = formattedDate;
-        document.getElementById('totalDaysResult').textContent = totalDays;
-        document.getElementById('countedDaysResult').textContent = countedDays;
-        document.getElementById('excludedDaysResult').textContent = excludedDays;
-        document.getElementById('suspendedDaysResult').textContent = currentCalculation.userSuspendedDates.length;
-        
-        // Listar suspensões informadas
-        const suspendedContainer = document.getElementById('suspendedDaysList');
-        suspendedContainer.innerHTML = '';
-        
-        if (currentCalculation.userSuspendedDates.length > 0) {
-            const ul = document.createElement('ul');
-
-            currentCalculation.userSuspendedDates.forEach(item => {
-                const li = document.createElement('li');
-
-                const impactou = suspendedDaysList.some(
-                    s => s.date.toDateString() === item.date.toDateString()
-                );
-
-                li.innerHTML = `
-                    <span class="data-suspensao">
-                        ${item.date.toLocaleDateString('pt-BR')}
-                    </span>
-                    - ${item.motivo}
-                    ${impactou ? '' : ' <em style="color:#6c757d;">(impactou o prazo)</em>'}
-                `;
-
-                ul.appendChild(li);
-            });
-
-            suspendedContainer.appendChild(ul);
-        } else {
-            suspendedContainer.innerHTML =
-                '<p style="color: #6c757d; font-style: italic;">Nenhuma suspensão informada pelo usuário.</p>';
-        }
-        
-        // Listar dias contados
-        const countedContainer = document.getElementById('countedDaysList');
-        countedContainer.innerHTML = '';
-        
-        countedDaysList.slice(0, 20).forEach(day => {
-            const dayElement = document.createElement('div');
-            dayElement.className = 'day day-counted';
-            dayElement.textContent = day.date.toLocaleDateString('pt-BR');
-            countedContainer.appendChild(dayElement);
-        });
-        
-        if (countedDaysList.length > 20) {
-            const moreElement = document.createElement('div');
-            moreElement.className = 'day day-counted';
-            moreElement.textContent = `+${countedDaysList.length - 20} dias`;
-            countedContainer.appendChild(moreElement);
-        }
-        
-        // Listar dias não contados (agrupados por tipo)
-        const excludedContainer = document.getElementById('excludedDaysList');
-        excludedContainer.innerHTML = '';
-        
-        // Separar dias suspensos dos outros
-        const suspendedExcluded = excludedDaysList.filter(d => d.type === 'suspended');
-        const otherExcluded = excludedDaysList.filter(d => d.type !== 'suspended');
-        
-        // Mostrar dias suspensos primeiro
-        suspendedExcluded.slice(0, 10).forEach(day => {
-            const dayElement = document.createElement('div');
-            dayElement.className = 'day day-suspended';
-            dayElement.textContent = `${day.date.toLocaleDateString('pt-BR')} (Suspenso)`;
-            dayElement.title = day.motivo;
-            excludedContainer.appendChild(dayElement);
-        });
-        
-        // Mostrar outros dias não contados
-        otherExcluded.slice(0, 10).forEach(day => {
-            const dayElement = document.createElement('div');
-            dayElement.className = 'day day-not-counted';
-            
-            const dayOfWeek = day.date.getDay();
-            let dayType = '';
-            
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                dayType = dayOfWeek === 0 ? '(Dom)' : '(Sáb)';
-            } else {
-                dayType = '(Feriado)';
-            }
-            
-            dayElement.textContent = `${day.date.toLocaleDateString('pt-BR')} ${dayType}`;
-            excludedContainer.appendChild(dayElement);
-        });
-        
-        const totalExcluded = excludedDaysList.length;
-        if (totalExcluded > 20) {
-            const moreElement = document.createElement('div');
-            moreElement.className = 'day day-not-counted';
-            moreElement.textContent = `+${totalExcluded - 20} dias`;
-            excludedContainer.appendChild(moreElement);
-        }
-        
-        // Exibir seção de resultados
-        document.getElementById('resultados').style.display = 'block';
-    }
-
-    // Gerar PDF Otimizado com Grid 5x6
-            function gerarPDF() {
-                if (!currentCalculation) {
-                    alert('Por favor, calcule um prazo primeiro antes de gerar o PDF.');
-                    return;
-                }
-
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
-
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const margin = 20;
-                let yPos = margin;
-
-                // ============================
-                // CONTROLE DE QUEBRA DE PÁGINA
-                // ============================
-                function checkPageBreak(extra = 20) {
-                    if (yPos + extra > pageHeight - margin) {
-                        doc.addPage();
-                        yPos = margin;
-                    }
-                }
-
-                // ============================
-                // FUNÇÃO DE GRID (5 COLUNAS x 6 LINHAS)
-                // ============================
-                function renderGridList({ title, items, getText, titleColor = [0, 0, 0] }) {
-                    if (!items || items.length === 0) return;
-
-                    checkPageBreak(60); // Aumentado para 60
-
-                    // Título da seção
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(...titleColor);
-                    doc.text(title, margin, yPos);
-                    yPos += 10; // Aumentado de 8 para 10
-
-                    doc.setFontSize(8); // Fonte menor para caber mais
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(0, 0, 0);
-
-                    const maxCols = 5;
-                    const maxRows = 6;
-                    const maxItems = maxCols * maxRows; // 30 itens por grid
-                    const colGap = 3; // Gap reduzido entre colunas
-
-                    const usableWidth = pageWidth - 2 * margin;
-                    const colWidth = (usableWidth - (maxCols - 1) * colGap) / maxCols;
-
-                    const startY = yPos;
-
-                    // Renderizar grid (preenche por COLUNA, depois por linha)
-                    items.slice(0, maxItems).forEach((item, index) => {
-                        const col = Math.floor(index / maxRows);
-                        const row = index % maxRows;
-
-                        const x = margin + col * (colWidth + colGap);
-                        const y = startY + row * 4.5; // Espaçamento vertical menor
-
-                        const text = getText(item);
-                        // Truncar texto longo para caber na coluna
-                        const truncated = doc.splitTextToSize(`• ${text}`, colWidth - 2);
-                        doc.text(truncated[0], x, y);
-                    });
-
-                    yPos = startY + maxRows * 4.5 + 8; // Aumentado de 5 para 8
-
-                    // Indicar se há mais itens
-                    if (items.length > maxItems) {
-                        doc.setFontSize(9);
-                        doc.setTextColor(120, 120, 120);
-                        doc.text(`... e mais ${items.length - maxItems} dia(s)`, margin, yPos);
-                        yPos += 8; // Aumentado de 6 para 8
-                    }
-                    
-                    yPos += 5; // Espaço extra após cada lista
-                }
-
-                // ============================
-                // CABEÇALHO
-                // ============================
-                doc.setFontSize(20);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0, 109, 119);
-                doc.text("PAIVA & ROCHA", pageWidth / 2, yPos, { align: 'center' });
-
-                yPos += 6;
-                doc.setFontSize(12);
-                doc.setTextColor(52, 58, 64);
-                doc.text("ADVOCACIA", pageWidth / 2, yPos, { align: 'center' });
-
-                yPos += 10;
-                doc.setDrawColor(0, 109, 119);
-                doc.setLineWidth(0.5);
-                doc.line(margin, yPos, pageWidth - margin, yPos);
-
-                yPos += 8;
-
-                // Título do documento
-                doc.setFontSize(18);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0, 0, 0);
-                doc.text("CÁLCULO DE PRAZO PROCESSUAL", pageWidth / 2, yPos, { align: 'center' });
-
-                yPos += 10;
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(100, 100, 100);
-                doc.text(
-                    `Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`,
-                    pageWidth / 2,
-                    yPos,
-                    { align: 'center' }
-                );
-
-                yPos += 12;
-
-                // ============================
-                // PARÂMETROS DO CÁLCULO
-                // ============================
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0, 0, 0);
-                doc.text("PARÂMETROS DO CÁLCULO", margin, yPos);
-
-                yPos += 10;
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'normal');
-
-                // Data Inicial
-                doc.setTextColor(0, 109, 119);
-                doc.text("Data Inicial:", margin, yPos);
-                doc.setTextColor(0, 0, 0);
-                doc.text(currentCalculation.startDate.toLocaleDateString('pt-BR'), margin + 40, yPos);
-
-                yPos += 7;
-
-                // Prazo
-                doc.setTextColor(0, 109, 119);
-                doc.text("Prazo:", margin, yPos);
-                doc.setTextColor(0, 0, 0);
-                doc.text(
-                    `${currentCalculation.days} dias ${currentCalculation.deadlineType === 'work' ? 'úteis' : 'corridos'}`,
-                    margin + 40,
-                    yPos
-                );
-
-                yPos += 7;
-
-                // Localidade
-                const stateName = document.querySelector(`#state option[value="${currentCalculation.state}"]`)?.text || currentCalculation.state;
-                doc.setTextColor(0, 109, 119);
-                doc.text("Localidade:", margin, yPos);
-                doc.setTextColor(0, 0, 0);
-                const localidade = `${stateName}${currentCalculation.city ? ` - ${currentCalculation.city}` : ''}`;
-                doc.text(localidade, margin + 40, yPos);
-
-                yPos += 7;
-
-                // Tipo de Processo
-                doc.setTextColor(0, 109, 119);
-                doc.text("Tipo de Processo:", margin, yPos);
-                doc.setTextColor(0, 0, 0);
-                doc.text(
-                    currentCalculation.processType === 'electronic' ? 'Processo Eletrônico' : 'Processo Físico',
-                    margin + 55,
-                    yPos
-                );
-
-                yPos += 7;
-
-                // Suspensões informadas
-                if (currentCalculation.userSuspendedDates.length > 0) {
-                    doc.setTextColor(0, 109, 119);
-                    doc.text("Suspensões:", margin, yPos);
-                    doc.setTextColor(0, 0, 0);
-                    doc.text(`${currentCalculation.userSuspendedDates.length} dia(s) informado(s)`, margin + 40, yPos);
-                    yPos += 7;
-                }
-
-                yPos += 8;
-
-                // ============================
-                // RESULTADO FINAL
-                // ============================
-                checkPageBreak(30);
-
-                doc.setFillColor(0, 109, 119);
-                doc.rect(margin, yPos, pageWidth - 2 * margin, 15, 'F');
-
-                doc.setFontSize(16);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(255, 255, 255);
-                doc.text("PRAZO FINAL:", margin + 10, yPos + 10);
-
-                doc.setFontSize(18);
-                doc.text(currentCalculation.finalDate.toLocaleDateString('pt-BR'), pageWidth - margin - 60, yPos + 10);
-
-                yPos += 30; // Aumentado de 25 para 30
-
-                // ============================
-                // ESTATÍSTICAS (4 BOXES)
-                // ============================
-                checkPageBreak(40);
-
-                const boxWidth = (pageWidth - 2 * margin - 30) / 4;
-
-                // Box 1: Dias Solicitados
-                doc.setFillColor(248, 249, 250);
-                doc.rect(margin, yPos, boxWidth, 20, 'F');
-                doc.setDrawColor(206, 212, 218);
-                doc.rect(margin, yPos, boxWidth, 20, 'S');
-
-                doc.setFontSize(20);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0, 109, 119);
-                doc.text(currentCalculation.days.toString(), margin + boxWidth / 2, yPos + 10, { align: 'center' });
-
-                doc.setFontSize(9);
-                doc.setTextColor(108, 117, 125);
-                doc.text("Dias Solicitados", margin + boxWidth / 2, yPos + 17, { align: 'center' });
-
-                // Box 2: Dias Contados
-                doc.setFillColor(248, 249, 250);
-                doc.rect(margin + boxWidth + 10, yPos, boxWidth, 20, 'F');
-                doc.rect(margin + boxWidth + 10, yPos, boxWidth, 20, 'S');
-
-                doc.setFontSize(20);
-                doc.setTextColor(0, 109, 119);
-                doc.text(
-                    currentCalculation.countedDaysCount.toString(),
-                    margin + boxWidth + 10 + boxWidth / 2,
-                    yPos + 10,
-                    { align: 'center' }
-                );
-
-                doc.setFontSize(9);
-                doc.setTextColor(108, 117, 125);
-                doc.text("Dias Contados", margin + boxWidth + 10 + boxWidth / 2, yPos + 17, { align: 'center' });
-
-                // Box 3: Dias Não Contados
-                doc.setFillColor(248, 249, 250);
-                doc.rect(margin + (boxWidth + 10) * 2, yPos, boxWidth, 20, 'F');
-                doc.rect(margin + (boxWidth + 10) * 2, yPos, boxWidth, 20, 'S');
-
-                doc.setFontSize(20);
-                doc.setTextColor(0, 109, 119);
-                doc.text(
-                    currentCalculation.excludedDaysCount.toString(),
-                    margin + (boxWidth + 10) * 2 + boxWidth / 2,
-                    yPos + 10,
-                    { align: 'center' }
-                );
-
-                doc.setFontSize(9);
-                doc.setTextColor(108, 117, 125);
-                doc.text("Dias Não Contados", margin + (boxWidth + 10) * 2 + boxWidth / 2, yPos + 17, { align: 'center' });
-
-                // Box 4: Dias Suspensos
-                doc.setFillColor(248, 249, 250);
-                doc.rect(margin + (boxWidth + 10) * 3, yPos, boxWidth, 20, 'F');
-                doc.rect(margin + (boxWidth + 10) * 3, yPos, boxWidth, 20, 'S');
-
-                doc.setFontSize(20);
-                doc.setTextColor(138, 154, 91);
-                doc.text(
-                    currentCalculation.userSuspendedDates.length.toString(),
-                    margin + (boxWidth + 10) * 3 + boxWidth / 2,
-                    yPos + 10,
-                    { align: 'center' }
-                );
-                doc.setFontSize(9);
-                doc.setTextColor(108, 117, 125);
-                doc.text("Dias Suspensos", margin + (boxWidth + 10) * 3 + boxWidth / 2, yPos + 17, { align: 'center' });
-
-                yPos += 35; // Aumentado espaço após os boxes
-
-                // ============================
-                // LISTAS EM GRID (5x6)
-                // ============================
-                
-                // Verifica se há espaço suficiente para a primeira lista
-                checkPageBreak(60);
-
-                // Dias Contados
-                renderGridList({
-                    title: "DIAS CONTADOS PARA O PRAZO:",
-                    items: currentCalculation.countedDays,
-                    getText: d => d.date.toLocaleDateString('pt-BR'),
-                    titleColor: [0, 109, 119]
-                });
-
-                // Dias Não Contados
-                renderGridList({
-                    title: "DIAS NÃO CONTADOS:",
-                    items: currentCalculation.excludedDays,
-                    getText: d => {
-                        const data = d.date.toLocaleDateString('pt-BR');
-                        if (d.type === 'weekend') return `${data} (FDS)`;
-                        if (d.type === 'holiday') return `${data} (Feriado)`;
-                        if (d.type === 'suspended') return `${data} (Susp.)`;
-                        return data;
-                    },
-                    titleColor: [198, 40, 40]
-                });
-
-                // Dias Suspensos (se houver)
-                if (currentCalculation.userSuspendedDates.length > 0) {
-                    renderGridList({
-                        title: "DIAS SUSPENSOS (INFORMADOS PELO USUÁRIO):",
-                        items: currentCalculation.userSuspendedDates.map(item => {
-                            // Verificar se impactou o prazo
-                            const impactou = currentCalculation.suspendedDays.some(
-                                s => s.date.toDateString() === item.date.toDateString()
-                            );
-                            
-                            return {
-                                ...item,
-                                impacto: impactou ? '(impactou)' : '(não impactou)'
-                            };
-                        }),
-                        getText: d => `${d.date.toLocaleDateString('pt-BR')} - ${d.motivo.substring(0, 20)} ${d.impacto}`,
-                        titleColor: [138, 154, 91]
-                    });
-                }
-
-                // ============================
-                // OBSERVAÇÕES
-                // ============================
-                checkPageBreak(40);
-
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0, 0, 0);
-                doc.text("OBSERVAÇÕES:", margin, yPos);
-
-                yPos += 10; // Aumentado de 8 para 10
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-
-                const observacaoText = currentCalculation.processType === 'electronic'
-                    ? 'Para processo eletrônico, o prazo termina às 24h do último dia.'
-                    : 'Para processo físico, o prazo termina no final do horário do fórum (normalmente 18h).';
-
-                const lines = doc.splitTextToSize(observacaoText, pageWidth - 2 * margin);
-                doc.text(lines, margin, yPos);
-
-                yPos += lines.length * 6 + 8; // Aumentado de 5 para 8
-
-                // Disclaimer
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
-                const disclaimer = "Ferramenta de apoio informativo. O cálculo observa o CPC (arts. 219 a 225), podendo não contemplar feriados locais ou peculiaridades do caso concreto.";
-
-                const disclaimerLines = doc.splitTextToSize(disclaimer, pageWidth - 2 * margin);
-                doc.text(disclaimerLines, margin, yPos);
-
-                yPos += disclaimerLines.length * 4 + 12; // Aumentado de 10 para 12
-
-                // ============================
-                // RODAPÉ
-                // ============================
-                doc.setDrawColor(0, 109, 119);
-                doc.setLineWidth(0.5);
-                doc.line(margin, yPos, pageWidth - margin, yPos);
-
-                yPos += 8; // Aumentado de 5 para 8
-
-                doc.setFontSize(9);
-                doc.setTextColor(100, 100, 100);
-                doc.text("Paiva & Rocha Advocacia • www.paivaerocha.com.br", pageWidth / 2, yPos, { align: 'center' });
-
-                yPos += 7; // Aumentado de 5 para 7
-                doc.setFontSize(8);
-                doc.text("Largo IX de abril, Ed. Cecisa 1, 26, Sala 622, Vila Santa Cecília, Volta Redonda/RJ", pageWidth / 2, yPos, { align: 'center' });
-
-                yPos += 6; // Aumentado de 4 para 6
-                doc.text("(24) 98119-1013 (Dr. Brener) • (24) 99989-1676 (Dr. Paulo)", pageWidth / 2, yPos, { align: 'center' });
-
-                // ============================
-                // SALVAR PDF
-                // ============================
-                const fileName = `Calculo_Prazo_${new Date().toISOString().slice(0, 10)}_${Date.now().toString().slice(-6)}.pdf`;
-                doc.save(fileName);
-
-                alert('PDF gerado com sucesso! O arquivo foi baixado automaticamente.');
-            }
-
-    // Calcular automaticamente ao carregar a página
-    window.addEventListener('load', function() {
-        setTimeout(() => {
-            calculateDeadline();
-        }, 500);
-    });
-
-    // Adicionar evento de tecla Enter
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            calculateDeadline();
-        }
-    });
-    </script>
+// Feriados Nacionais 2026
+const nationalHolidays = [
+'2026-01-01',
+'2026-02-16',
+'2026-02-17',
+'2026-04-03',
+'2026-04-21',
+'2026-05-01',
+'2026-06-04',
+'2026-09-07',
+'2026-10-12',
+'2026-11-02',
+'2026-11-15',
+'2026-12-25'
+];
+// Feriados Estaduais (exemplos)
+const stateHolidays = {
+'SP': ['2026-07-09'], // Revolução Constitucionalista
+'RJ': ['2026-04-23'], // Dia de São Jorge - FERIADO DO RJ
+'MG': ['2026-04-21'], // Data Magna de MG
+'RS': ['2026-09-20'], // Revolução Farroupilha
+'PR': ['2026-12-19'], // Emancipação do Paraná
+'SC': ['2026-08-11'], // Dia de Santa Catarina
+'BA': ['2026-07-02'], // Independência da Bahia
+'DF': ['2026-04-21']  // Fundação de Brasília
+};
+
+// ============ IMPLEMENTAÇÃO DO RECESSO FORENSE (Art. 220 CPC) ============
+// Função para verificar se data está em recesso forense (20/12 a 20/01)
+function isJudicialRecess(date) {
+  const month = date.getMonth() + 1; // getMonth() retorna 0-11
+  const day = date.getDate();
+  
+  // Período de 20/12 a 31/12
+  if (month === 12 && day >= 20) {
+    return true;
+  }
+  
+  // Período de 01/01 a 20/01
+  if (month === 1 && day <= 20) {
+    return true;
+  }
+  
+  return false;
+}
+// ========================================================================
+
+// Variáveis para armazenar dados do cálculo
+let currentCalculation = null;
+let userSuspendedDates = [];
+
+// Inicializar data atual
+document.getElementById('startDate').valueAsDate = new Date();
+
+// Função para selecionar opções de rádio com estilo
+function selectOption(element, groupName) {
+const groupElements = document.querySelectorAll(`[name="${groupName}"]`);
+groupElements.forEach(input => {
+input.parentElement.classList.remove('selected');
+});
+element.classList.add('selected');
+const radioInput = element.querySelector('input[type="radio"]');
+if (radioInput) {
+radioInput.checked = true;
+}
+}
+
+// Função para processar suspensões informadas pelo usuário
+function processSuspendedDates() {
+const suspensoesText = document.getElementById('suspensoes').value;
+userSuspendedDates = [];
+if (!suspensoesText.trim()) {
+return [];
+}
+const lines = suspensoesText.split('\n');
+const suspendedDates = [];
+lines.forEach(line => {
+line = line.trim();
+if (!line) return;
+// Extrair data do formato DD/MM/AAAA
+const dateMatch = line.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+if (dateMatch) {
+const day = parseInt(dateMatch[1]);
+const month = parseInt(dateMatch[2]) - 1; // JavaScript months are 0-indexed
+const year = parseInt(dateMatch[3]);
+// Extrair motivo (tudo após o hífen)
+const motivoMatch = line.match(/-\s*(.+)/);
+const motivo = motivoMatch ? motivoMatch[1].trim() : 'Suspensão informada pelo usuário';
+const date = new Date(year, month, day);
+if (!isNaN(date.getTime())) {
+// Formatar data para YYYY-MM-DD para comparação (usando data local)
+const y = date.getFullYear();
+const m = String(date.getMonth() + 1).padStart(2, '0');
+const d = String(date.getDate()).padStart(2, '0');
+const dateStr = `${y}-${m}-${d}`;
+suspendedDates.push({
+date: date,
+dateStr: dateStr,
+motivo: motivo,
+originalLine: line
+});
+}
+}
+});
+return suspendedDates;
+}
+
+// Verificar se é dia útil (SEM verificar suspensões do usuário)
+function isWorkDay(date) {
+const dayOfWeek = date.getDay();
+// Verificar se é sábado ou domingo
+if (dayOfWeek === 0 || dayOfWeek === 6) {
+return false;
+}
+// Formatar data para comparação (usando data local para evitar erro de fuso horário)
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, '0');
+const day = String(date.getDate()).padStart(2, '0');
+const dateStr = `${year}-${month}-${day}`;
+// Verificar se é feriado nacional
+if (nationalHolidays.includes(dateStr)) {
+return false;
+}
+// Verificar se é feriado estadual
+const state = document.getElementById('state').value;
+if (state && stateHolidays[state]) {
+if (stateHolidays[state].includes(dateStr)) {
+return false;
+}
+}
+// EXCLUIR DIAS DE RECESSO FORENSE (Art. 220 CPC)
+if (isJudicialRecess(date)) {
+return false;
+}
+return true;
+}
+
+// Verificar se data está suspensa pelo usuário
+function isUserSuspendedDate(date) {
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, '0');
+const day = String(date.getDate()).padStart(2, '0');
+const dateStr = `${year}-${month}-${day}`;
+return userSuspendedDates.find(s => s.dateStr === dateStr);
+}
+
+// Calcular prazo final
+function calculateDeadline() {
+const startDateInput = document.getElementById('startDate').value;
+const days = parseInt(document.getElementById('days').value);
+const state = document.getElementById('state').value;
+const processType = document.querySelector('input[name="processType"]:checked').value;
+const deadlineType = document.querySelector('input[name="deadlineType"]:checked').value;
+const city = document.getElementById('city').value;
+// Processar datas suspensas
+userSuspendedDates = deadlineType === 'work'
+? processSuspendedDates()
+: [];
+if (!startDateInput) {
+alert('Por favor, selecione uma data inicial.');
+return;
+}
+if (!days || days < 1) {
+alert('Por favor, informe um número válido de dias.');
+return;
+}
+// REGRA DO CPC (art. 224):
+// Exclui o dia do começo e inicia a contagem no dia seguinte
+// Tratamento de data para evitar problemas de fuso horário (cria data local 00:00)
+const dateParts = startDateInput.split('-');
+let currentDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+// A contagem sempre começa no dia seguinte ao evento (Exclui o dia do começo)
+currentDate.setDate(currentDate.getDate() + 1);
+// Para prazos em dias úteis (art. 219 do CPC),
+// a contagem deve iniciar no primeiro dia útil subsequente
+if (deadlineType === 'work') {
+while (!isWorkDay(currentDate) || isUserSuspendedDate(currentDate)) {
+currentDate.setDate(currentDate.getDate() + 1);
+}
+}
+const countedDays = [];
+const excludedDays = [];
+const suspendedDays = [];
+let daysCounted = 0;
+let totalDaysPassed = 0;
+if (deadlineType === 'work') {
+while (daysCounted < days) {
+const y = currentDate.getFullYear();
+const m = String(currentDate.getMonth() + 1).padStart(2, '0');
+const d = String(currentDate.getDate()).padStart(2, '0');
+const dateStr = `${y}-${m}-${d}`;
+// Verificar se é recesso forense
+const isRecesso = isJudicialRecess(currentDate);
+// Verificar se é data suspensa pelo usuário
+const suspendedDate = isUserSuspendedDate(currentDate);
+// Tratar recesso forense e suspensões do usuário
+if (isRecesso || suspendedDate) {
+if (isRecesso) {
+excludedDays.push({
+date: new Date(currentDate),
+type: 'recesso',
+motivo: 'Recesso Forense - Art. 220 CPC'
+});
+}
+if (suspendedDate) {
+suspendedDays.push({
+date: new Date(currentDate),
+motivo: suspendedDate.motivo
+});
+excludedDays.push({
+date: new Date(currentDate),
+type: 'suspended',
+motivo: suspendedDate.motivo
+});
+}
+// Avança para o próximo dia
+currentDate.setDate(currentDate.getDate() + 1);
+totalDaysPassed++;
+continue;
+}
+// Se não for suspensa nem recesso, verificar se é dia útil
+if (isWorkDay(currentDate)) {
+// É dia útil normal
+daysCounted++;
+countedDays.push({
+date: new Date(currentDate),
+type: 'workday'
+});
+} else {
+// Não é dia útil (fim de semana ou feriado)
+const dayOfWeek = currentDate.getDay();
+const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+// Verificar se é feriado nacional
+const isNationalHoliday = nationalHolidays.includes(dateStr);
+// Verificar se é feriado estadual
+let isStateHoliday = false;
+if (state && stateHolidays[state]) {
+isStateHoliday = stateHolidays[state].includes(dateStr);
+}
+excludedDays.push({
+date: new Date(currentDate),
+type: isWeekend ? 'weekend' : 'holiday',
+motivo: isWeekend ? '' :
+(isNationalHoliday ? 'Feriado Nacional' :
+(isStateHoliday ? 'Feriado Estadual' : 'Feriado'))
+});
+}
+totalDaysPassed++;
+currentDate.setDate(currentDate.getDate() + 1);
+}
+// vencimento = último dia útil contado
+currentDate.setDate(currentDate.getDate() - 1);
+} else {
+// ============================
+// DIAS CORRIDOS (CPC art. 224)
+// ============================
+// Tratamento de data para evitar problemas de fuso horário
+const tempDateParts = startDateInput.split('-');
+let tempDate = new Date(tempDateParts[0], tempDateParts[1] - 1, tempDateParts[2]);
+// Exclui o dia do começo (A contagem inicia no dia seguinte)
+tempDate.setDate(tempDate.getDate() + 1);
+for (let i = 0; i < days; i++) {
+countedDays.push({
+date: new Date(tempDate),
+type: 'calendar'
+});
+// avança sempre
+tempDate.setDate(tempDate.getDate() + 1);
+}
+// vencimento = último dia contado
+tempDate.setDate(tempDate.getDate() - 1);
+currentDate = new Date(tempDate);
+totalDaysPassed = days;
+}
+// Armazenar dados do cálculo
+currentCalculation = {
+startDate: new Date(
+dateParts[0],
+dateParts[1] - 1,
+dateParts[2]
+),
+days: days,
+state: state,
+city: city,
+processType: processType,
+deadlineType: deadlineType,
+finalDate: currentDate,
+countedDays: countedDays,
+excludedDays: excludedDays,
+suspendedDays: suspendedDays,
+userSuspendedDates: userSuspendedDates,
+countedDaysCount: countedDays.length,
+excludedDaysCount: excludedDays.length,
+suspendedDaysCount: suspendedDays.length
+};
+// Ativar botão de PDF
+document.getElementById('btnPDF').disabled = false;
+// Atualizar observação
+const observation = document.getElementById('processObservation');
+if (deadlineType === 'work') {
+if (processType === 'electronic') {
+observation.textContent = `Para processo eletrônico, o prazo termina às 24h do último dia. Este cálculo considera feriados nacionais, estaduais, o recesso forense (20/12 a 20/01 - Art. 220 CPC)${userSuspendedDates.length > 0 ? ` e ${userSuspendedDates.length} dia(s) de suspensão informado(s) pelo usuário.` : '.'}`;
+} else {
+observation.textContent = `Para processo físico, o prazo termina no final do horário do fórum (normalmente 18h). Este cálculo considera feriados nacionais, estaduais, o recesso forense (20/12 a 20/01 - Art. 220 CPC)${userSuspendedDates.length > 0 ? ` e ${userSuspendedDates.length} dia(s) de suspensão informado(s) pelo usuário.` : '.'}`;
+}
+} else {
+if (processType === 'electronic') {
+observation.textContent = `Para processo eletrônico, o prazo termina às 24h do último dia. Este cálculo considera feriados nacionais e estaduais.`;
+} else {
+observation.textContent = `Para processo físico, o prazo termina no final do horário do fórum (normalmente 18h). Este cálculo considera feriados nacionais e estaduais.`;
+}
+}
+// Exibir resultados
+displayResults(currentDate, days, countedDays.length, excludedDays.length, suspendedDays.length, countedDays, excludedDays, suspendedDays);
+// Scroll para resultados
+document.getElementById('resultados').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Exibir resultados
+function displayResults(finalDate, totalDays, countedDays, excludedDays, suspendedDays, countedDaysList, excludedDaysList, suspendedDaysList) {
+const formattedDate = finalDate.toLocaleDateString('pt-BR');
+document.getElementById('finalDateResult').textContent = formattedDate;
+document.getElementById('totalDaysResult').textContent = totalDays;
+document.getElementById('countedDaysResult').textContent = countedDays;
+document.getElementById('excludedDaysResult').textContent = excludedDays;
+document.getElementById('suspendedDaysResult').textContent = currentCalculation.userSuspendedDates.length;
+// Listar suspensões informadas
+const suspendedContainer = document.getElementById('suspendedDaysList');
+suspendedContainer.innerHTML = '';
+if (currentCalculation.userSuspendedDates.length > 0) {
+const ul = document.createElement('ul');
+currentCalculation.userSuspendedDates.forEach(item => {
+const li = document.createElement('li');
+const impactou = suspendedDaysList.some(
+s => s.date.toDateString() === item.date.toDateString()
+);
+li.innerHTML = `
+<span class="data-suspensao">
+${item.date.toLocaleDateString('pt-BR')}
+</span>
+- ${item.motivo}
+${impactou ? '' : ' <em style="color:#6c757d;">(impactou o prazo)</em>'}
+`;
+ul.appendChild(li);
+});
+suspendedContainer.appendChild(ul);
+} else {
+suspendedContainer.innerHTML =
+'<p style="color: #6c757d; font-style: italic;">Nenhuma suspensão informada pelo usuário.</p>';
+}
+// Listar dias contados
+const countedContainer = document.getElementById('countedDaysList');
+countedContainer.innerHTML = '';
+countedDaysList.slice(0, 20).forEach(day => {
+const dayElement = document.createElement('div');
+dayElement.className = 'day day-counted';
+dayElement.textContent = day.date.toLocaleDateString('pt-BR');
+countedContainer.appendChild(dayElement);
+});
+if (countedDaysList.length > 20) {
+const moreElement = document.createElement('div');
+moreElement.className = 'day day-counted';
+moreElement.textContent = `+${countedDaysList.length - 20} dias`;
+countedContainer.appendChild(moreElement);
+}
+// Listar dias não contados (agrupados por tipo)
+const excludedContainer = document.getElementById('excludedDaysList');
+excludedContainer.innerHTML = '';
+// Separar dias de recesso e suspensos pelo usuário dos outros
+const specialExcluded = excludedDaysList.filter(d => d.type === 'suspended' || d.type === 'recesso');
+const otherExcluded = excludedDaysList.filter(d => d.type !== 'suspended' && d.type !== 'recesso');
+// Mostrar dias de recesso e suspensões primeiro
+specialExcluded.slice(0, 10).forEach(day => {
+const dayElement = document.createElement('div');
+if (day.type === 'recesso') {
+dayElement.className = 'day day-suspended';
+dayElement.textContent = `${day.date.toLocaleDateString('pt-BR')} (Recesso)`;
+dayElement.title = day.motivo;
+} else {
+dayElement.className = 'day day-suspended';
+dayElement.textContent = `${day.date.toLocaleDateString('pt-BR')} (Suspenso)`;
+dayElement.title = day.motivo;
+}
+excludedContainer.appendChild(dayElement);
+});
+// Mostrar outros dias não contados
+otherExcluded.slice(0, 10).forEach(day => {
+const dayElement = document.createElement('div');
+dayElement.className = 'day day-not-counted';
+const dayOfWeek = day.date.getDay();
+let dayType = '';
+if (dayOfWeek === 0 || dayOfWeek === 6) {
+dayType = dayOfWeek === 0 ? '(Dom)' : '(Sáb)';
+} else {
+dayType = '(Feriado)';
+}
+dayElement.textContent = `${day.date.toLocaleDateString('pt-BR')} ${dayType}`;
+excludedContainer.appendChild(dayElement);
+});
+const totalExcluded = excludedDaysList.length;
+if (totalExcluded > 20) {
+const moreElement = document.createElement('div');
+moreElement.className = 'day day-not-counted';
+moreElement.textContent = `+${totalExcluded - 20} dias`;
+excludedContainer.appendChild(moreElement);
+}
+// Exibir seção de resultados
+document.getElementById('resultados').style.display = 'block';
+}
+
+// Gerar PDF Otimizado com Grid 5x6
+function gerarPDF() {
+if (!currentCalculation) {
+alert('Por favor, calcule um prazo primeiro antes de gerar o PDF.');
+return;
+}
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF('p', 'mm', 'a4');
+const pageWidth = doc.internal.pageSize.getWidth();
+const pageHeight = doc.internal.pageSize.getHeight();
+const margin = 20;
+let yPos = margin;
+// ============================
+// CONTROLE DE QUEBRA DE PÁGINA
+// ============================
+function checkPageBreak(extra = 20) {
+if (yPos + extra > pageHeight - margin) {
+doc.addPage();
+yPos = margin;
+}
+}
+// ============================
+// FUNÇÃO DE GRID (5 COLUNAS x 6 LINHAS)
+// ============================
+function renderGridList({ title, items, getText, titleColor = [0, 0, 0] }) {
+if (!items || items.length === 0) return;
+checkPageBreak(60); // Aumentado para 60
+// Título da seção
+doc.setFontSize(12);
+doc.setFont('helvetica', 'bold');
+doc.setTextColor(...titleColor);
+doc.text(title, margin, yPos);
+yPos += 10; // Aumentado de 8 para 10
+doc.setFontSize(8); // Fonte menor para caber mais
+doc.setFont('helvetica', 'normal');
+doc.setTextColor(0, 0, 0);
+const maxCols = 5;
+const maxRows = 6;
+const maxItems = maxCols * maxRows; // 30 itens por grid
+const colGap = 3; // Gap reduzido entre colunas
+const usableWidth = pageWidth - 2 * margin;
+const colWidth = (usableWidth - (maxCols - 1) * colGap) / maxCols;
+const startY = yPos;
+// Renderizar grid (preenche por COLUNA, depois por linha)
+items.slice(0, maxItems).forEach((item, index) => {
+const col = Math.floor(index / maxRows);
+const row = index % maxRows;
+const x = margin + col * (colWidth + colGap);
+const y = startY + row * 4.5; // Espaçamento vertical menor
+const text = getText(item);
+// Truncar texto longo para caber na coluna
+const truncated = doc.splitTextToSize(`• ${text}`, colWidth - 2);
+doc.text(truncated[0], x, y);
+});
+yPos = startY + maxRows * 4.5 + 8; // Aumentado de 5 para 8
+// Indicar se há mais itens
+if (items.length > maxItems) {
+doc.setFontSize(9);
+doc.setTextColor(120, 120, 120);
+doc.text(`... e mais ${items.length - maxItems} dia(s)`, margin, yPos);
+yPos += 8; // Aumentado de 6 para 8
+}
+yPos += 5; // Espaço extra após cada lista
+}
+// ============================
+// CABEÇALHO
+// ============================
+doc.setFontSize(20);
+doc.setFont('helvetica', 'bold');
+doc.setTextColor(0, 109, 119);
+doc.text("PAIVA & ROCHA", pageWidth / 2, yPos, { align: 'center' });
+yPos += 6;
+doc.setFontSize(12);
+doc.setTextColor(52, 58, 64);
+doc.text("ADVOCACIA", pageWidth / 2, yPos, { align: 'center' });
+yPos += 10;
+doc.setDrawColor(0, 109, 119);
+doc.setLineWidth(0.5);
+doc.line(margin, yPos, pageWidth - margin, yPos);
+yPos += 8;
+// Título do documento
+doc.setFontSize(18);
+doc.setFont('helvetica', 'bold');
+doc.setTextColor(0, 0, 0);
+doc.text("CÁLCULO DE PRAZO PROCESSUAL", pageWidth / 2, yPos, { align: 'center' });
+yPos += 10;
+doc.setFontSize(11);
+doc.setFont('helvetica', 'normal');
+doc.setTextColor(100, 100, 100);
+doc.text(
+`Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`,
+pageWidth / 2,
+yPos,
+{ align: 'center' }
+);
+yPos += 12;
+// ============================
+// PARÂMETROS DO CÁLCULO
+// ============================
+doc.setFontSize(14);
+doc.setFont('helvetica', 'bold');
+doc.setTextColor(0, 0, 0);
+doc.text("PARÂMETROS DO CÁLCULO", margin, yPos);
+yPos += 10;
+doc.setFontSize(11);
+doc.setFont('helvetica', 'normal');
+// Data Inicial
+doc.setTextColor(0, 109, 119);
+doc.text("Data Inicial:", margin, yPos);
+doc.setTextColor(0, 0, 0);
+doc.text(currentCalculation.startDate.toLocaleDateString('pt-BR'), margin + 40, yPos);
+yPos += 7;
+// Prazo
+doc.setTextColor(0, 109, 119);
+doc.text("Prazo:", margin, yPos);
+doc.setTextColor(0, 0, 0);
+doc.text(
+`${currentCalculation.days} dias ${currentCalculation.deadlineType === 'work' ? 'úteis' : 'corridos'}`,
+margin + 40,
+yPos
+);
+yPos += 7;
+// Localidade
+const stateName = document.querySelector(`#state option[value="${currentCalculation.state}"]`)?.text || currentCalculation.state;
+doc.setTextColor(0, 109, 119);
+doc.text("Localidade:", margin, yPos);
+doc.setTextColor(0, 0, 0);
+const localidade = `${stateName}${currentCalculation.city ? ` - ${currentCalculation.city}` : ''}`;
+doc.text(localidade, margin + 40, yPos);
+yPos += 7;
+// Tipo de Processo
+doc.setTextColor(0, 109, 119);
+doc.text("Tipo de Processo:", margin, yPos);
+doc.setTextColor(0, 0, 0);
+doc.text(
+currentCalculation.processType === 'electronic' ? 'Processo Eletrônico' : 'Processo Físico',
+margin + 55,
+yPos
+);
+yPos += 7;
+// Suspensões informadas
+if (currentCalculation.userSuspendedDates.length > 0) {
+doc.setTextColor(0, 109, 119);
+doc.text("Suspensões:", margin, yPos);
+doc.setTextColor(0, 0, 0);
+doc.text(`${currentCalculation.userSuspendedDates.length} dia(s) informado(s)`, margin + 40, yPos);
+yPos += 7;
+}
+yPos += 8;
+// ============================
+// RESULTADO FINAL
+// ============================
+checkPageBreak(30);
+doc.setFillColor(0, 109, 119);
+doc.rect(margin, yPos, pageWidth - 2 * margin, 15, 'F');
+doc.setFontSize(16);
+doc.setFont('helvetica', 'bold');
+doc.setTextColor(255, 255, 255);
+doc.text("PRAZO FINAL:", margin + 10, yPos + 10);
+doc.setFontSize(18);
+doc.text(currentCalculation.finalDate.toLocaleDateString('pt-BR'), pageWidth - margin - 60, yPos + 10);
+yPos += 30; // Aumentado de 25 para 30
+// ============================
+// ESTATÍSTICAS (4 BOXES)
+// ============================
+checkPageBreak(40);
+const boxWidth = (pageWidth - 2 * margin - 30) / 4;
+// Box 1: Dias Solicitados
+doc.setFillColor(248, 249, 250);
+doc.rect(margin, yPos, boxWidth, 20, 'F');
+doc.setDrawColor(206, 212, 218);
+doc.rect(margin, yPos, boxWidth, 20, 'S');
+doc.setFontSize(20);
+doc.setFont('helvetica', 'bold');
+doc.setTextColor(0, 109, 119);
+doc.text(currentCalculation.days.toString(), margin + boxWidth / 2, yPos + 10, { align: 'center' });
+doc.setFontSize(9);
+doc.setTextColor(108, 117, 125);
+doc.text("Dias Solicitados", margin + boxWidth / 2, yPos + 17, { align: 'center' });
+// Box 2: Dias Contados
+doc.setFillColor(248, 249, 250);
+doc.rect(margin + boxWidth + 10, yPos, boxWidth, 20, 'F');
+doc.rect(margin + boxWidth + 10, yPos, boxWidth, 20, 'S');
+doc.setFontSize(20);
+doc.setTextColor(0, 109, 119);
+doc.text(
+currentCalculation.countedDaysCount.toString(),
+margin + boxWidth + 10 + boxWidth / 2,
+yPos + 10,
+{ align: 'center' }
+);
+doc.setFontSize(9);
+doc.setTextColor(108, 117, 125);
+doc.text("Dias Contados", margin + boxWidth + 10 + boxWidth / 2, yPos + 17, { align: 'center' });
+// Box 3: Dias Não Contados
+doc.setFillColor(248, 249, 250);
+doc.rect(margin + (boxWidth + 10) * 2, yPos, boxWidth, 20, 'F');
+doc.rect(margin + (boxWidth + 10) * 2, yPos, boxWidth, 20, 'S');
+doc.setFontSize(20);
+doc.setTextColor(0, 109, 119);
+doc.text(
+currentCalculation.excludedDaysCount.toString(),
+margin + (boxWidth + 10) * 2 + boxWidth / 2,
+yPos + 10,
+{ align: 'center' }
+);
+doc.setFontSize(9);
+doc.setTextColor(108, 117, 125);
+doc.text("Dias Não Contados", margin + (boxWidth + 10) * 2 + boxWidth / 2, yPos + 17, { align: 'center' });
+// Box 4: Dias Suspensos
+doc.setFillColor(248, 249, 250);
+doc.rect(margin + (boxWidth + 10) * 3, yPos, boxWidth, 20, 'F');
+doc.rect(margin + (boxWidth + 10) * 3, yPos, boxWidth, 20, 'S');
+doc.setFontSize(20);
+doc.setTextColor(138, 154, 91);
+doc.text(
+currentCalculation.userSuspendedDates.length.toString(),
+margin + (boxWidth + 10) * 3 + boxWidth / 2,
+yPos + 10,
+{ align: 'center' }
+);
+doc.setFontSize(9);
+doc.setTextColor(108, 117, 125);
+doc.text("Dias Suspensos", margin + (boxWidth + 10) * 3 + boxWidth / 2, yPos + 17, { align: 'center' });
+yPos += 35; // Aumentado espaço após os boxes
+// ============================
+// LISTAS EM GRID (5x6)
+// ============================
+// Verifica se há espaço suficiente para a primeira lista
+checkPageBreak(60);
+// Dias Contados
+renderGridList({
+title: "DIAS CONTADOS PARA O PRAZO:",
+items: currentCalculation.countedDays,
+getText: d => d.date.toLocaleDateString('pt-BR'),
+titleColor: [0, 109, 119]
+});
+// Dias Não Contados
+renderGridList({
+title: "DIAS NÃO CONTADOS:",
+items: currentCalculation.excludedDays,
+getText: d => {
+const data = d.date.toLocaleDateString('pt-BR');
+if (d.type === 'weekend') return `${data} (FDS)`;
+if (d.type === 'holiday') return `${data} (Feriado)`;
+if (d.type === 'suspended') return `${data} (Susp.)`;
+if (d.type === 'recesso') return `${data} (Recesso)`;
+return data;
+},
+titleColor: [198, 40, 40]
+});
+// Dias Suspensos (se houver)
+if (currentCalculation.userSuspendedDates.length > 0) {
+renderGridList({
+title: "DIAS SUSPENSOS (INFORMADOS PELO USUÁRIO):",
+items: currentCalculation.userSuspendedDates.map(item => {
+// Verificar se impactou o prazo
+const impactou = currentCalculation.suspendedDays.some(
+s => s.date.toDateString() === item.date.toDateString()
+);
+return {
+...item,
+impacto: impactou ? '(impactou)' : '(não impactou)'
+};
+}),
+getText: d => `${d.date.toLocaleDateString('pt-BR')} - ${d.motivo.substring(0, 20)} ${d.impacto}`,
+titleColor: [138, 154, 91]
+});
+}
+// ============================
+// OBSERVAÇÕES
+// ============================
+checkPageBreak(40);
+doc.setFontSize(12);
+doc.setFont('helvetica', 'bold');
+doc.setTextColor(0, 0, 0);
+doc.text("OBSERVAÇÕES:", margin, yPos);
+yPos += 10; // Aumentado de 8 para 10
+doc.setFontSize(10);
+doc.setFont('helvetica', 'normal');
+let observacaoText = '';
+if (currentCalculation.deadlineType === 'work') {
+observacaoText = currentCalculation.processType === 'electronic'
+? 'Para processo eletrônico, o prazo termina às 24h do último dia. Este cálculo considera feriados nacionais, estaduais e o recesso forense (20/12 a 20/01 - Art. 220 CPC).'
+: 'Para processo físico, o prazo termina no final do horário do fórum (normalmente 18h). Este cálculo considera feriados nacionais, estaduais e o recesso forense (20/12 a 20/01 - Art. 220 CPC).';
+} else {
+observacaoText = currentCalculation.processType === 'electronic'
+? 'Para processo eletrônico, o prazo termina às 24h do último dia. Este cálculo considera feriados nacionais e estaduais.'
+: 'Para processo físico, o prazo termina no final do horário do fórum (normalmente 18h). Este cálculo considera feriados nacionais e estaduais.';
+}
+const lines = doc.splitTextToSize(observacaoText, pageWidth - 2 * margin);
+doc.text(lines, margin, yPos);
+yPos += lines.length * 6 + 8; // Aumentado de 5 para 8
+// Disclaimer
+doc.setFontSize(8);
+doc.setTextColor(150, 150, 150);
+const disclaimer = "Ferramenta de apoio informativo. O cálculo observa o CPC (arts. 219 a 225), podendo não contemplar feriados locais ou peculiaridades do caso concreto.";
+const disclaimerLines = doc.splitTextToSize(disclaimer, pageWidth - 2 * margin);
+doc.text(disclaimerLines, margin, yPos);
+yPos += disclaimerLines.length * 4 + 12; // Aumentado de 10 para 12
+// ============================
+// RODAPÉ
+// ============================
+doc.setDrawColor(0, 109, 119);
+doc.setLineWidth(0.5);
+doc.line(margin, yPos, pageWidth - margin, yPos);
+yPos += 8; // Aumentado de 5 para 8
+doc.setFontSize(9);
+doc.setTextColor(100, 100, 100);
+doc.text("Paiva & Rocha Advocacia • www.paivaerocha.com.br", pageWidth / 2, yPos, { align: 'center' });
+yPos += 7; // Aumentado de 5 para 7
+doc.setFontSize(8);
+doc.text("Largo IX de abril, Ed. Cecisa 1, 26, Sala 622, Vila Santa Cecília, Volta Redonda/RJ", pageWidth / 2, yPos, { align: 'center' });
+yPos += 6; // Aumentado de 4 para 6
+doc.text("(24) 98119-1013 (Dr. Brener) • (24) 99989-1676 (Dr. Paulo)", pageWidth / 2, yPos, { align: 'center' });
+// ============================
+// SALVAR PDF
+// ============================
+const fileName = `Calculo_Prazo_${new Date().toISOString().slice(0, 10)}_${Date.now().toString().slice(-6)}.pdf`;
+doc.save(fileName);
+alert('PDF gerado com sucesso! O arquivo foi baixado automaticamente.');
+}
+
+// Calcular automaticamente ao carregar a página
+window.addEventListener('load', function() {
+setTimeout(() => {
+calculateDeadline();
+}, 500);
+});
+
+// Adicionar evento de tecla Enter
+document.addEventListener('keydown', function(event) {
+if (event.key === 'Enter') {
+calculateDeadline();
+}
+});
+</script>
 </body>
 </html>
